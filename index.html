@@ -7,24 +7,18 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <!-- GAME SECTION: your coder friend will inject/embed the game here -->
   <main class="container">
-    <!-- Hero / Title -->
-    <section class="hero">
+    <section id="game-container" class="game-container">
       <h1>🎵 Music Gate</h1>
-      <p>Play the short pattern to open the portals.</p>
-      <button id="start-game" class="btn">Start</button>
-      <p id="status" class="status" aria-live="polite"></p>
+      <p>This is where the interactive game will go.</p>
+
+      <!-- You can delete this button later if not needed -->
+      <button id="start-placeholder" class="btn">Start Game</button>
     </section>
 
-    <!-- Simple Simon-style game -->
-    <section id="game" class="game">
-      <button class="pad" data-note="0" aria-label="Pad 1"></button>
-      <button class="pad" data-note="1" aria-label="Pad 2"></button>
-      <button class="pad" data-note="2" aria-label="Pad 3"></button>
-      <button class="pad" data-note="3" aria-label="Pad 4"></button>
-    </section>
-
-    <!-- Portals (hidden until game is cleared once) -->
+    <!-- PORTALS: hidden by default until the game unlocks -->
     <section id="portals" class="portals hidden" aria-hidden="true">
       <h2>Choose your portal</h2>
       <div class="portal-grid">
@@ -35,7 +29,7 @@
       </div>
     </section>
 
-    <!-- Tiny about/contact strip -->
+    <!-- Tiny footer -->
     <footer class="about-strip">
       <p>About: I’m [Your Name] — musician / builder. Contact: <a href="mailto:you@example.com">you@example.com</a></p>
       <p>© <span id="year"></span></p>
