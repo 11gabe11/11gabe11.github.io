@@ -36,19 +36,35 @@ html { scroll-behavior: smooth; }
   cursor: pointer;
 }
 
-/* -------- Mobile only -------- */
 @media (max-width: 768px) {
   .menu-toggle {
-    display: inline-block; /* show button on mobile */
+    display: inline-block;
   }
 
   #site-nav {
-    display: none; /* hide links on mobile by default */
+    display: none;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;               /* more spacing between buttons */
     margin-top: 12px;
+
+    /* ✅ center the menu on tiny screens */
     align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
   }
+
+  #site-nav.open {
+    display: flex;
+  }
+
+  #site-nav .button {
+    width: 90%;              /* ✅ make buttons fill most of the width */
+    max-width: 250px;        /* ✅ prevents them from being too wide on tablets */
+    text-align: center;
+  }
+}
+
 
   #site-nav.open {
     display: flex; /* show links when menu is open */
