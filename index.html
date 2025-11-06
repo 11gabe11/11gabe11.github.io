@@ -24,12 +24,21 @@
     <a class="button" href="about.html">About page</a>
   </header>
   <main>
-    <div class="card">
-      <h2>Welcome</h2>
-      <p>If you can see this live on the web, you’ve already launched a website. 🎉</p>
-      <p>Next, create a <code>style.css</code> file to customize styles, and an <code>about.html</code> file.</p>
-    </div>
-  </main>
+  <section id="home" class="section">
+    <h2>Home</h2>
+    <p>If you can see this live on the web, you’ve already launched a website. 🎉</p>
+  </section>
+
+  <section id="about" class="section">
+    <h2>About</h2>
+    <p>This section lives on the homepage, and there’s also a separate full <a href="about.html">About page</a>.</p>
+  </section>
+
+  <section id="contact" class="section">
+    <h2>Contact</h2>
+    <p>Email me at <a href="mailto:you@example.com">you@example.com</a></p>
+  </section>
+</main>
   <footer>© <span id="year"></span> Me</footer>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
