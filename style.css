@@ -24,8 +24,10 @@ a:hover { text-decoration: none; }
 html { scroll-behavior: smooth; }
 
 /* === Mobile menu styles === */
+
+/* hide toggle button by default */
 .menu-toggle {
-  display: none;           /* hidden on desktop */
+  display: none;
   margin-top: 12px;
   padding: 10px 14px;
   border: 1px solid #ddd;
@@ -34,19 +36,27 @@ html { scroll-behavior: smooth; }
   cursor: pointer;
 }
 
-/* Small screens: show button, hide nav until opened */
+/* -------- Mobile only -------- */
 @media (max-width: 768px) {
-  .menu-toggle { display: inline-block; }
+  .menu-toggle {
+    display: inline-block; /* show button on mobile */
+  }
+
   #site-nav {
-    display: none;         /* hidden by default on mobile */
+    display: none; /* hide links on mobile by default */
     flex-direction: column;
     gap: 8px;
     margin-top: 12px;
     align-items: center;
   }
+
   #site-nav.open {
-    display: flex;         /* shown when JS adds .open */
+    display: flex; /* show links when menu is open */
   }
-  /* Make buttons full-width-ish on mobile for easier tapping */
-  #site-nav .button { width: 100%; text-align: center; }
+
+  /* Make nav buttons full width on small screens */
+  #site-nav .button {
+    width: 100%;
+    text-align: center;
+  }
 }
