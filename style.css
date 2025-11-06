@@ -76,3 +76,57 @@ html { scroll-behavior: smooth; }
     text-align: center;
   }
 }
+
+/* Landing layout */
+.container {
+  max-width: 960px;
+  margin: 24px auto;
+  padding: 0 16px;
+  text-align: center;
+}
+
+/* Placeholder button */
+.btn {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+/* Hidden portals until game unlocks */
+.hidden {
+  display: none;
+}
+
+.portals {
+  margin-top: 32px;
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.portal {
+  display: block;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  text-decoration: none;
+  background: #fff;
+}
+.portal:hover {
+  background: #fafafa;
+}
+
+.about-strip {
+  text-align: center;
+  color: #666;
+  border-top: 1px solid #eee;
+  padding: 16px;
+}
