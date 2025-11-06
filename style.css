@@ -1,0 +1,4 @@
+/* Your global styles */
+body { color:#222; background:#fff; }
+a { color: inherit; text-decoration: underline; }
+h1,h2 { letter-spacing: 0.3px; }
