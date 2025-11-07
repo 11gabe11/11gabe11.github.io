@@ -1,40 +1,16 @@
 // scripts.js
-
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("✅ scripts.js is connected and running.");
+  const yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // --- Smooth scroll for internal links ---
-  const smoothLinks = document.querySelectorAll('a[href^="#"]');
-  smoothLinks.forEach(link => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const targetID = link.getAttribute("href");
-      const targetSection = document.querySelector(targetID);
-      if (targetSection) {
-        targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    });
-  });
+  const portals = document.getElementById("portals");
 
-  // --- Mobile menu toggle ---
-  const toggleBtn = document.getElementById("menu-toggle");
-  const nav = document.getElementById("site-nav");
+  // Your game can call this function to reveal portals.
+  window.unlockPortals = function () {
+    portals.classList.remove("hidden");
+    portals.setAttribute("aria-hidden", "false");
+    console.log("✅ portals unlocked");
+  };
 
-  if (toggleBtn && nav) {
-    toggleBtn.addEventListener("click", () => {
-      const isOpen = nav.classList.toggle("open");
-      // keep ARIA state accurate for accessibility
-      toggleBtn.setAttribute("aria-expanded", String(isOpen));
-    });
-
-    // Close menu after clicking a nav link (mobile)
-    nav.querySelectorAll("a").forEach(a => {
-      a.addEventListener("click", () => {
-        if (nav.classList.contains("open")) {
-          nav.classList.remove("open");
-          toggleBtn.setAttribute("aria-expanded", "false");
-        }
-      });
-    });
-  }
+  console.log("✅ scripts.js loaded. Use window.unlockPortals() from the game.");
 });
