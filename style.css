@@ -205,15 +205,20 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
   position:fixed; inset:0; z-index:0; pointer-events:none;
   filter: drop-shadow(0 0 6px rgba(156,226,255,.25));
 }
-
-/* ===== Custom cursor — Real Homing Pigeon (desktop only) ===== */
-@media (pointer: fine) { html, body, *, a, button, .bubble { cursor: none !important; } }
+/* Bigger, more cinematic homing pigeon cursor */
 #wp-cursor{
-  position:fixed; left:0; top:0; z-index:9999; pointer-events:none;
-  width:clamp(30px,4.2vmin,48px); height:auto;
-  transform:translate3d(-9999px,-9999px,0);
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,.06)) drop-shadow(0 10px 22px rgba(0,0,0,.38));
+  position:fixed;
+  left:0; top:0;
+  z-index:9999;
+  pointer-events:none;
+  width: clamp(60px, 6vmin, 110px); /* ⬅️ Bigger bird */
+  height:auto;
+  transform: translate3d(-9999px,-9999px,0);
+  filter:
+    drop-shadow(0 2px 1px rgba(255,255,255,.06))
+    drop-shadow(0 12px 22px rgba(0,0,0,.45));
 }
+
 /* Wing rigs (150x96 viewBox shoulder ~64,44) */
 #wp-cursor svg #wing-R, #wp-cursor svg #wing-L { transform-origin: 64px 44px; }
 @keyframes dp-flap-R { 0%{transform:rotate(18deg)} 30%{transform:rotate(-46deg)} 60%{transform:rotate(-38deg)} 100%{transform:rotate(18deg)} }
