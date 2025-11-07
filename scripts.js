@@ -50,8 +50,8 @@ const BEAK_X = 112, BEAK_Y = 40;  // beak-tip hotspot
 
   // speed controls (px per millisecond)
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const SPEED_MIN = prefersReducedMotion ? 0.006 : 0.016; // gentle drift
-  const SPEED_MAX = prefersReducedMotion ? 0.012 : 0.022;
+  const SPEED_MIN = prefersReducedMotion ? 0.012 : 0.016; // gentle drift
+  const SPEED_MAX = prefersReducedMotion ? 0.018 : 0.022;
 
   function randSpeed() {
     const v = Math.random() * (SPEED_MAX - SPEED_MIN) + SPEED_MIN;
