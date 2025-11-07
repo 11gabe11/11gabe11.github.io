@@ -6,45 +6,35 @@
   <title>Artist Approvals · The Drifting Pigeon</title>
   <link rel="stylesheet" href="../style.css" />
   <script type="module" src="../pigeon.js"></script>
-  <script type="module" src="../scripts/auth.js"></script>
   <script type="module">
-    import { sb, approveRequest, requireAuthOrSendTo } from '../scripts/auth.js';
+    import { requireAuthOrSendTo, approveRequest } from '../scripts/auth.js';
 
     async function load() {
       await requireAuthOrSendTo('../auth.html');
 
+      // Load pending artist verification requests
+      const { sb } = await import('../scripts/auth.js');
       const { data: { session } } = await sb.auth.getSession();
-      const myId = session?.user?.id;
-
-      const { data: me } = await sb
-        .from('profiles')
-        .select('handle, role_id')
-        .eq('user_id', myId)
-        .maybeSingle();
 
       const list = document.querySelector('#list');
 
-      if (!me || me.role_id !== 'artist' || !me.handle) {
-        list.innerHTML = '<p>Set your Artist handle in your profile to receive requests.</p>';
-        return;
-      }
+      // (Optional) gate by staff role if you have one
+      // const { data: me } = await sb.from('profiles').select('role_id').eq('user_id', session.user.id).maybeSingle();
+      // if (me?.role_id !== 'staff') { list.innerHTML = '<p>Staff only.</p>'; return; }
 
       const { data, error } = await sb
         .from('verification_requests')
-        .select('id, requester_id, target_artist_handle, created_at')
-        .eq('role_requested', 'agent')
-        .eq('target_artist_handle', me.handle)
+        .select('id, requester_id, role_requested, created_at')
+        .eq('role_requested', 'artist')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) { list.textContent = 'Error: ' + error.message; return; }
-
-      if (!data?.length) { list.innerHTML = '<p>No pending agent requests.</p>'; return; }
+      if (!data?.length) { list.innerHTML = '<p>No pending artist requests.</p>'; return; }
 
       list.innerHTML = data.map(r => `
         <div class="section">
-          <div><strong>Agent request</strong> from <code>${r.requester_id}</code></div>
-          <div>Artist handle: <code>${r.target_artist_handle}</code></div>
+          <div><strong>Artist request</strong> from <code>${r.requester_id}</code></div>
           <div>Requested: ${new Date(r.created_at).toLocaleString()}</div>
           <p>
             <button class="button" data-id="${r.id}" data-yes="1">Approve</button>
@@ -68,12 +58,10 @@
 </head>
 <body class="portal-body">
   <main class="portal-content">
-    <a class="back-link" href="../artist.html">← Back to Artist</a>
-    <h1>Agent Approvals</h1>
+    <a class="back-link" href="../agent.html">← Back</a>
+    <h1>Artist Approvals</h1>
     <div id="list"></div>
   </main>
-  <script type="module" src="pigeon.js"></script>
-<script type="module" src="scripts/auth.js"></script>
-<script type="module" src="scripts/cursor.js"></script>
+  <script type="module" src="../scripts/cursor.js"></script>
 </body>
 </html>
