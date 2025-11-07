@@ -205,19 +205,23 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
   position:fixed; inset:0; z-index:0; pointer-events:none;
   filter: drop-shadow(0 0 6px rgba(156,226,255,.25));
 }
-/* Bigger, more cinematic homing pigeon cursor */
+/* Constant-size, larger homing pigeon cursor (desktop/laptop only) */
 #wp-cursor{
-  position:fixed;
-  left:0; top:0;
-  z-index:9999;
-  pointer-events:none;
-  width: clamp(60px, 6vmin, 110px); /* ⬅️ Bigger bird */
-  height:auto;
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 9999;
+  pointer-events: none;
+
+  /* fixed size on any computer screen */
+  width: 128px;   /* ⬅️ bump this up or down to taste (e.g., 140px) */
+  height: auto;
+
   transform: translate3d(-9999px,-9999px,0);
   filter:
     drop-shadow(0 2px 1px rgba(255,255,255,.06))
     drop-shadow(0 12px 22px rgba(0,0,0,.45));
 }
+
 #wp-cursor svg {
   transform-origin: 50% 50%;
 }
