@@ -25,16 +25,14 @@ body{
 
 /* ====== Landing square (2x2) ====== */
 .frame{
-  width:min(92vmin, 920px);
-  aspect-ratio:1/1;
-  border-radius:18px;
+  width: 100vw;                  /* full screen width */
+  height: 100vh;                 /* full screen height */
+  border-radius: 0;              /* set 0 for edge-to-edge (or keep 18px if you want rounded) */
   background: linear-gradient(180deg,var(--surface),#0f0f0f);
-  border:1px solid var(--chrome-1);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.04) inset,
-    0 16px 40px rgba(0,0,0,0.35);
-  position:relative;
-  overflow:hidden;
+  border: 1px solid var(--chrome-1);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.35) inset; /* subtle inner depth */
+  position: relative;
+  overflow: hidden;
 }
 
 /* thin chrome edge + subtle gold sheen on hover */
