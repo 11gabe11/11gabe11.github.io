@@ -452,3 +452,19 @@ a:hover{ color:#ffe09a; }
 @media (max-width: 420px){
   :root{ --bubble-vmin: 14vmin; }
 }
+
+/* === CLICKABILITY GUARANTEE === */
+
+/* make sure the actual bubble (the <a>) receives the click */
+.bubble {
+  pointer-events: auto;      /* clickable */
+  position: absolute;        /* JS handles position */
+  z-index: 5;                /* bubble is always above effects */
+}
+
+/* effects should NOT block clicks */
+.bubble::before,
+.bubble::after {
+  pointer-events: none !important;  /* effects can't intercept clicks */
+  z-index: -1;                      /* keep visuals underneath the link */
+}
