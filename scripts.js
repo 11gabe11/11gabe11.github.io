@@ -1,5 +1,54 @@
 // scripts.js — floating, colliding portal bubbles (no unlock)
 document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", () => {
+  // --- Custom pigeon cursor (desktop only) ---
+  const useCustomCursor = window.matchMedia("(pointer: fine)").matches;
+  const cursorEl = document.getElementById("wp-cursor");
+
+  if (useCustomCursor && cursorEl) {
+    // Beak hotspot offset (relative to the SVG size we render)
+    // Our SVG viewBox is 64x48; the beak tip sits around (56, 20).
+    // We scale the SVG via CSS width; compute offset dynamically.
+    const hotspot = { x: 56/64, y: 20/48 }; // as proportions of the SVG box
+
+    let lastX = 0, lastY = 0;
+    let rafId = null;
+
+    function place(x, y) {
+      // Size of the rendered SVG
+      const renderedW = cursorEl.getBoundingClientRect().width || 32;
+      const renderedH = renderedW * (48/64);
+      const offsetX = renderedW * hotspot.x;
+      const offsetY = renderedH * hotspot.y;
+
+      cursorEl.style.transform = `translate3d(${x - offsetX}px, ${y - offsetY}px, 0)`;
+    }
+
+    function onMove(e) {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      if (!rafId) {
+        rafId = requestAnimationFrame(() => {
+          place(lastX, lastY);
+          rafId = null;
+        });
+      }
+    }
+
+    window.addEventListener("mousemove", onMove, { passive: true });
+    // Show immediately at first move
+    window.addEventListener("mousemove", (e) => place(e.clientX, e.clientY), { once: true });
+
+    // Optional: hide when leaving window
+    window.addEventListener("mouseleave", () => {
+      cursorEl.style.transform = "translate3d(-9999px,-9999px,0)";
+    });
+  }
+  // --- end custom cursor ---
+  
+  // ... your floating-bubbles code continues below ...
+});
+
   // ✅ make sure all bubbles are always clickable (safety override)
 document.querySelectorAll('.bubble').forEach(b => {
   b.style.pointerEvents = "auto";
