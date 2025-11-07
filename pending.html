@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pending Approval · The Drifting Pigeon</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="pigeon.js"></script>
+  <script type="module" src="scripts/auth.js"></script>
+  <script type="module">
+    import { currentProfile } from './scripts/auth.js';
+    async function check() {
+      const p = await currentProfile();
+      if (!p) { location.href = 'auth.html'; return; }
+      if (p.role_id === 'agent' || p.role_id === 'venue_booker') {
+        if (p.is_verified) {
+          location.href = (p.role_id === 'agent') ? 'agent.html' : 'venue-booker.html';
+        }
+      } else {
+        if (p.role_id === 'artist') location.href = 'artist.html';
+        if (p.role_id === 'punter') location.href = 'punter.html';
+        if (p.role_id === 'venue_supervisor') location.href = 'venue-supervisor.html';
+      }
+    }
+    window.addEventListener('DOMContentLoaded', () => { check(); setInterval(check, 4000); });
+  </script>
+</head>
+<body class="portal-body">
+  <main class="portal-content">
+    <h1>Pending approval</h1>
+    <p class="lede">Thanks! A verifier has been notified. This page will auto-refresh.</p>
+  </main>
+</body>
+</html>
