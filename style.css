@@ -117,7 +117,10 @@ a{ color:var(--gold-1); } a:hover{ color:#ffe09a; }
 @media (max-width:420px){ :root{ --bubble-vmin:14vmin; } }
 
 /* ===== Custom cursor — The Wandering Pigeon (desktop only) ===== */
-@media (pointer:fine){ html,body{ cursor:none !important; } }
+@media (pointer: fine) { html, body, *, a, button, .bubble { cursor: none !important; } }
+/* wings use these IDs & shoulder joint */
+#wp-cursor svg #wp-wing-R, #wp-cursor svg #wp-wing-L { transform-origin: 48px 40px; }
+
 
 #wp-cursor{
   position:fixed; left:0; top:0; z-index:9999; pointer-events:none;
