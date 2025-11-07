@@ -506,3 +506,38 @@ a:hover{ color:#ffe09a; }
   #wp-cursor svg #wp-wing-top,
   #wp-cursor svg #wp-wing-bot { animation: none; }
 }
+/* ===== The Wandering Pigeon: custom cursor (desktop only) ===== */
+
+/* Hide native cursor on precise pointers; keep for touch */
+@media (pointer: fine) {
+  html, body { cursor: none !important; }
+}
+
+#wp-cursor {
+  position: fixed;
+  left: 0; top: 0;
+  width: clamp(28px, 3.6vmin, 40px); /* small, crisp */
+  height: auto;
+  pointer-events: none;              /* never blocks clicks */
+  z-index: 9999;
+  transform: translate3d(-9999px,-9999px,0); /* off-screen until first move */
+  filter:
+    drop-shadow(0 1px 0 rgba(255,255,255,.05))
+    drop-shadow(0 8px 18px rgba(0,0,0,.35));
+}
+
+/* Wing flap animation */
+@keyframes wp-flap {
+  0%   { transform: rotate(6deg); }
+  50%  { transform: rotate(-8deg); }
+  100% { transform: rotate(6deg); }
+}
+#wp-cursor svg #wp-wing-top { animation: wp-flap 720ms ease-in-out infinite; }
+#wp-cursor svg #wp-wing-bot { animation: wp-flap 720ms ease-in-out -360ms infinite; }
+
+/* Reduce motion if user requests it */
+@media (prefers-reduced-motion: reduce) {
+  #wp-cursor svg #wp-wing-top,
+  #wp-cursor svg #wp-wing-bot { animation: none; }
+}
+
