@@ -125,14 +125,32 @@ a{ color:var(--gold-1); } a:hover{ color:#ffe09a; }
   transform:translate3d(-9999px,-9999px,0);
   filter:drop-shadow(0 1px 0 rgba(255,255,255,.05)) drop-shadow(0 8px 18px rgba(0,0,0,.35));
 }
+/* Realistic homing-pigeon flap */
+@keyframes wp-flap-R {
+  0%   { transform: rotate(18deg); }     /* wide open (downstroke) */
+  30%  { transform: rotate(-46deg); }    /* fast upstroke */
+  60%  { transform: rotate(-40deg); }    /* brief top hold */
+  100% { transform: rotate(18deg); }     /* slower downstroke */
+}
+@keyframes wp-flap-L {
+  0%   { transform: rotate(-18deg); }
+  30%  { transform: rotate(46deg); }
+  60%  { transform: rotate(40deg); }
+  100% { transform: rotate(-18deg); }
+}
 
-/* wing flap */
-@keyframes wp-flap{ 0%{transform:rotate(6deg)} 50%{transform:rotate(-8deg)} 100%{transform:rotate(6deg)} }
-#wp-cursor svg #wp-wing-top{ animation:wp-flap 720ms ease-in-out infinite; transform-origin:20px 22px; }
-#wp-cursor svg #wp-wing-bot{ animation:wp-flap 720ms ease-in-out -360ms infinite; transform-origin:20px 30px; }
+/* shoulder joint in the new SVG's viewBox */
+#wp-cursor svg #wp-wing-R { transform-origin: 48px 40px; animation: wp-flap-R 720ms ease-in-out infinite; }
+#wp-cursor svg #wp-wing-L { transform-origin: 48px 40px; animation: wp-flap-L 720ms ease-in-out infinite; }
 
-@media (prefers-reduced-motion:reduce){
-  #wp-cursor svg #wp-wing-top,#wp-cursor svg #wp-wing-bot{ animation:none; }
+/* subtle body bob */
+@keyframes wp-body-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-0.6px) } }
+#wp-cursor svg { animation: wp-body-bob 720ms ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce){
+  #wp-cursor svg, #wp-cursor svg #wp-wing-R, #wp-cursor svg #wp-wing-L { animation:none; }
+}
+
 }
 
 /* Hide native cursor absolutely everywhere on precise pointers */
