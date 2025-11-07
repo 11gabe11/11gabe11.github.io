@@ -12,13 +12,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let H = stage.clientHeight;
 
   // bubble state
-  const nodes = bubbles.map(el => ({
-    el,
-    x: 0, y: 0,
-    vx: (Math.random() * 0.25 + 0.15) * (Math.random() < 0.5 ? -1 : 1), // px/ms
-    vy: (Math.random() * 0.25 + 0.15) * (Math.random() < 0.5 ? -1 : 1), // px/ms
-    r:  0
-  }));
+// --- speed controls (px per millisecond) ---
+const SPEED_MIN = 0.010;   // very slow
+const SPEED_MAX = 0.030;   // still slow
+function randSpeed(){ return (Math.random() * (SPEED_MAX - SPEED_MIN) + SPEED_MIN) * (Math.random() < 0.5 ? -1 : 1); }
+
+const nodes = bubbles.map(el => ({
+  el,
+  x: 0, y: 0,
+  vx: randSpeed(),
+  vy: randSpeed(),
+  r:  0
+}));
 
   // initial layout
   function initializeLayout(){
