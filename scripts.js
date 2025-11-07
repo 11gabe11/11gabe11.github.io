@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // bubble state
 // --- speed controls (px per millisecond) ---
-const SPEED_MIN = 0.006;   // very slow
-const SPEED_MAX = 0.012;   // still slow
+const SPEED_MIN = 0.008;   // very slow
+const SPEED_MAX = 0.022;   // still slow
 function randSpeed(){ return (Math.random() * (SPEED_MAX - SPEED_MIN) + SPEED_MIN) * (Math.random() < 0.5 ? -1 : 1); }
 
 const nodes = bubbles.map(el => ({
