@@ -7,16 +7,15 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Fullscreen, no scroll. Centered square frame containing a 2x2 grid -->
-  <div class="frame">
-    <nav class="quadgrid" aria-label="Portal selection">
-  <a class="quad artist" href="artist.html">Artist</a>
-  <a class="quad agent"  href="agent.html">Agent</a>
-  <a class="quad booker" href="booker.html">Booker / Venue</a>
-  <a class="quad punter" href="punter.html">Punter</a>
-</nav>
-
+<div class="frame">
+  <div class="stage" id="stage" aria-label="Portal selection">
+    <a class="bubble artist" href="artist.html"><span>Artist</span></a>
+    <a class="bubble agent"  href="agent.html"><span>Agent</span></a>
+    <a class="bubble booker" href="booker.html"><span>Booker</span></a>
+    <a class="bubble punter" href="punter.html"><span>Punter</span></a>
   </div>
+</div>
+
 
   <!-- (Optional) tiny footer overlay; remove if you truly want nothing else -->
   <footer class="corner-note">
