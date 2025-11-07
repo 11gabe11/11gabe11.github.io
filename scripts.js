@@ -1,18 +1,19 @@
-// scripts.js — Full-viewport nests + precise wall edges + elastic collisions + egg rolling
+// scripts.js — Full-viewport nests + ellipse-ellipse collisions + clipped twigs + rolling eggs
 document.addEventListener("DOMContentLoaded", () => {
   const stage = document.getElementById("stage");
   if (!stage) return;
 
-  /* ---------- Build nests (twigs + eggs, as before) ---------- */
+  /* ---------- Promote .bubble → .nest and (re)build eggs + twigs ---------- */
   const nests = Array.from(stage.querySelectorAll(".bubble"));
   nests.forEach(el => el.classList.add("nest"));
 
-  // Make twig bowls + random eggs (0–3)
   nests.forEach(el => {
+    // remove old procedural twigs, if any
     el.querySelectorAll(".twig").forEach(t => t.remove());
 
-    const eggCount = Math.floor(Math.random() * 4); // 0..3
-    // ensure exactly 3 egg nodes exist; show first N
+    // --- Random eggs (0..3) on every load ---
+    const eggCount = Math.floor(Math.random() * 4);
+    // ensure 3 egg nodes exist; show first N
     const have = el.querySelectorAll(".egg").length;
     for (let i = have; i < 3; i++) {
       const egg = document.createElement("i");
@@ -23,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
       egg.style.display = (idx < eggCount) ? "block" : "none";
     });
 
-    // Procedural twigs in 3 rings for depth
+    // --- Procedural twigs: 3 rings, but inside the nest, and clipped by overflow:hidden ---
     const ringDefs = [
       { cls: "back", count: 22, baseRot: 0,   spread: 190, y: 0.50 },
       { cls: "mid",  count: 26, baseRot: 12,  spread: 200, y: 0.56 },
@@ -31,6 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     const getCSS = (name) =>
       getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#3a2d21";
+
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
 
     ringDefs.forEach(ring => {
       for (let i = 0; i < ring.count; i++) {
@@ -50,22 +54,27 @@ document.addEventListener("DOMContentLoaded", () => {
         twig.style.setProperty("--twig-c1", c1);
         twig.style.setProperty("--twig-c2", c2);
 
+        // place along an ellipse, but inset so tips never cross the visual rim
+        const inset = 0.80;                         // 0.00 = outer edge, <1.0 pulls twigs in
+        const rx = (w * 0.5) * inset;
+        const ry = (h * 0.58) * inset;              // a little flatter to match bowl tilt
         const angle = (ring.baseRot + (i / ring.count) * ring.spread) + (Math.random()*6 - 3);
         const rad = angle * Math.PI / 180;
-        const radiusPx = (el.offsetWidth/2) * 0.78;
-        const cx = el.offsetWidth/2 + Math.cos(rad) * radiusPx;
-        const cy = el.offsetHeight * ring.y + Math.sin(rad) * (radiusPx * 0.18);
+
+        const cx = w/2 + Math.cos(rad) * rx;
+        const cy = h*ring.y + Math.sin(rad) * (ry * 0.35);
         const tilt = (Math.random()*1.4 - 0.7);
 
         twig.style.left = `${cx}px`;
         twig.style.top  = `${cy}px`;
         twig.style.setProperty("--twig-tf", `translate(-50%,-50%) rotate(${angle+tilt}deg)`);
+
         el.appendChild(twig);
       }
     });
   });
 
-  /* ---------- Physics: full-viewport bounds + exact edges ---------- */
+  /* ---------- Physics: full-viewport bounds + ellipse–ellipse collisions ---------- */
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const SPEED_MIN = prefersReducedMotion ? 0.012 : 0.016;
   const SPEED_MAX = prefersReducedMotion ? 0.018 : 0.022;
@@ -75,17 +84,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return (Math.random() < 0.5 ? -v : v);
   };
 
-  // Node model stores per-axis radii (rx = half width, ry = half height)
   const nodes = nests.map(el => ({
     el,
     x: 0, y: 0,
     vx: randSpeed(),
     vy: randSpeed(),
-    rx: 0, ry: 0, // updated from DOM
-    eggs: []      // rolling state
+    rx: 0, ry: 0,  // half-width / half-height used for walls
+    eggs: []
   }));
 
-  // viewport bounds
   let BW = window.innerWidth;
   let BH = window.innerHeight;
 
@@ -94,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     BH = window.innerHeight;
     nodes.forEach(n => {
       const r = n.el.getBoundingClientRect();
-      n.rx = r.width / 2;
+      n.rx = r.width  / 2;
       n.ry = r.height / 2;
     });
   }
@@ -104,20 +111,21 @@ document.addEventListener("DOMContentLoaded", () => {
   function seed() {
     measure();
     const cols = 2, rows = 2, pad = 12;
-
     nodes.forEach((n, i) => {
       const c = i % cols;
       const r = Math.floor(i / cols);
-      const cellW = BW / cols;
-      const cellH = BH / rows;
-      n.x = (c + 0.5) * cellW + (Math.random()*20 - 10);
-      n.y = (r + 0.5) * cellH + (Math.random()*20 - 10);
+      const cellW = BW / cols, cellH = BH / rows;
+
+      n.x = (c + 0.5) * cellW + (Math.random() * 20 - 10);
+      n.y = (r + 0.5) * cellH + (Math.random() * 20 - 10);
+
       n.x = clamp(n.x, n.rx + pad, BW - n.rx - pad);
       n.y = clamp(n.y, n.ry + pad, BH - n.ry - pad);
+
       n.el.style.left = (n.x - n.rx) + "px";
       n.el.style.top  = (n.y - n.ry) + "px";
 
-      // egg rolling initial states
+      // egg rolling state
       const eggs = Array.from(n.el.querySelectorAll(".egg")).filter(e => e.style.display !== "none");
       n.eggs = eggs.map((egg, idx) => ({
         el: egg,
@@ -130,36 +138,53 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // precise wall containment using rx/ry so edges touch window edges exactly
+  // precise wall containment by ellipse edges (rx/ry)
   function contain(n) {
-    if (n.x - n.rx <= 0)   { n.x = n.rx;       n.vx = Math.abs(n.vx); }
-    if (n.x + n.rx >= BW)  { n.x = BW - n.rx;  n.vx = -Math.abs(n.vx); }
-    if (n.y - n.ry <= 0)   { n.y = n.ry;       n.vy = Math.abs(n.vy); }
-    if (n.y + n.ry >= BH)  { n.y = BH - n.ry;  n.vy = -Math.abs(n.vy); }
+    if (n.x - n.rx <= 0)  { n.x = n.rx;      n.vx = Math.abs(n.vx); }
+    if (n.x + n.rx >= BW) { n.x = BW - n.rx; n.vx = -Math.abs(n.vx); }
+    if (n.y - n.ry <= 0)  { n.y = n.ry;      n.vy = Math.abs(n.vy); }
+    if (n.y + n.ry >= BH) { n.y = BH - n.ry; n.vy = -Math.abs(n.vy); }
   }
 
-  // elastic collisions (approximate each nest as a circle with radius = max(rx, ry))
+  // helper: radius of an ellipse along a unit direction n = (ux,uy)
+  function ellipseRadiusAlong(ux, uy, rx, ry) {
+    // r(θ) = 1 / sqrt( (cos^2θ)/rx^2 + (sin^2θ)/ry^2 )
+    const denom = (ux*ux)/(rx*rx) + (uy*uy)/(ry*ry);
+    return 1 / Math.sqrt(Math.max(denom, 1e-9));
+  }
+
+  // true ellipse–ellipse separation and velocity reflection along the line of centers
   function collide(a, b) {
-    const ra = Math.max(a.rx, a.ry);
-    const rb = Math.max(b.rx, b.ry);
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
-    const dist = Math.hypot(dx, dy) || 0.0001;
-    const overlap = (ra + rb) - dist;
+    let dx = b.x - a.x;
+    let dy = b.y - a.y;
+    let dist = Math.hypot(dx, dy);
+
+    // handle identical center (rare): nudge
+    if (dist < 1e-6) { dx = 1e-3; dy = 0; dist = 1e-3; }
+
+    const ux = dx / dist;
+    const uy = dy / dist;
+
+    const ra = ellipseRadiusAlong(ux, uy, a.rx, a.ry);
+    const rb = ellipseRadiusAlong(-ux, -uy, b.rx, b.ry); // opposite direction
+    const needed = ra + rb;
+
+    const overlap = needed - dist;
     if (overlap <= 0) return;
 
-    const nx = dx / dist, ny = dy / dist;
-    const sep = overlap / 2 + 0.5;
-    a.x -= nx * sep; a.y -= ny * sep;
-    b.x += nx * sep; b.y += ny * sep;
+    // separate along the normal
+    const sep = overlap / 2 + 0.5; // small bias to avoid sticky contacts
+    a.x -= ux * sep; a.y -= uy * sep;
+    b.x += ux * sep; b.y += uy * sep;
 
+    // reflect velocities along the collision normal if approaching
     const rvx = b.vx - a.vx;
     const rvy = b.vy - a.vy;
-    const rel = rvx * nx + rvy * ny;
+    const rel = rvx * ux + rvy * uy;
     if (rel < 0) {
-      const j = -rel; // equal mass elastic
-      a.vx -= nx * j; a.vy -= ny * j;
-      b.vx += nx * j; b.vy += ny * j;
+      const j = -rel; // equal mass, perfectly elastic along normal
+      a.vx -= ux * j; a.vy -= uy * j;
+      b.vx += ux * j; b.vy += uy * j;
     }
   }
 
@@ -170,10 +195,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ---------- Egg rolling (same model, adapted) ---------- */
+  /* ---------- Egg rolling inside each bowl ---------- */
   function updateEggs(n, dt) {
     if (!n.eggs?.length) return;
-
     const bw = n.el.offsetWidth;
     const bh = n.el.offsetHeight;
     const maxX = bw * 0.22;
@@ -214,8 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ---------- Main loop ---------- */
   let last = performance.now();
   function tick(now) {
-    const dt = Math.min(32, now - last);
-    last = now;
+    const dt = Math.min(32, now - last); last = now;
 
     nodes.forEach(n => { n.x += n.vx * dt; n.y += n.vy * dt; contain(n); });
     for (let i = 0; i < nodes.length; i++) {
@@ -231,11 +254,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   seed();
   requestAnimationFrame(tick);
+  window.addEventListener("resize", seed);
 
-  // Re-measure on resize / orientation changes
-  window.addEventListener("resize", () => { seed(); });
-
-  // Micro transition on click
+  // leave-page micro transition
   stage.addEventListener("click", (e) => {
     const a = e.target.closest("a.bubble");
     if (!a) return;
