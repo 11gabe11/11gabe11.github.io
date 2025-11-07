@@ -1,132 +1,71 @@
-/* Base layout */
-:root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #fff; line-height: 1.6; }
-main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
-
-/* Header + nav */
-header { padding: 32px 16px; text-align: center; background: #f5f5f5; }
-nav { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-a.button { display: inline-block; padding: 10px 14px; border-radius: 8px; border: 1px solid #ddd; text-decoration: none; }
-a.button:hover { background: #fafafa; }
-
-/* Sections */
-.section { padding: 24px; border: 1px solid #eee; border-radius: 12px; margin: 16px 0; }
-.section h2 { margin-top: 0; }
-
-/* Footer */
-footer { text-align: center; color: #666; padding: 24px; }
-
-/* Links */
-a { color: inherit; text-decoration: underline; }
-a:hover { text-decoration: none; }
-
-/* Make in-page anchor scrolling smooth (backup to your JS) */
-html { scroll-behavior: smooth; }
-
-/* === Mobile menu styles === */
-
-/* hide toggle button by default */
-.menu-toggle {
-  display: none;
-  margin-top: 12px;
-  padding: 10px 14px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: inline-block;
-  }
-
-  #site-nav {
-    display: none;
-    flex-direction: column;
-    gap: 12px;               /* more spacing between buttons */
-    margin-top: 12px;
-
-    /* ✅ center the menu on tiny screens */
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    text-align: center;
-  }
-
-  #site-nav.open {
-    display: flex;
-  }
-
-  #site-nav .button {
-    width: 90%;              /* ✅ make buttons fill most of the width */
-    max-width: 250px;        /* ✅ prevents them from being too wide on tablets */
-    text-align: center;
-  }
-}
-
-
-  #site-nav.open {
-    display: flex; /* show links when menu is open */
-  }
-
-  /* Make nav buttons full width on small screens */
-  #site-nav .button {
-    width: 100%;
-    text-align: center;
-  }
-}
-
-/* Landing layout */
-.container {
-  max-width: 960px;
-  margin: 24px auto;
-  padding: 0 16px;
-  text-align: center;
-}
-
-/* Placeholder button */
-.btn {
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #fff;
-  cursor: pointer;
-  margin-top: 12px;
-}
-
-/* Hidden portals until game unlocks */
-.hidden {
-  display: none;
-}
-
-.portals {
-  margin-top: 32px;
-}
-
-.portal-grid {
+/* ==== Reset & fullscreen canvas (no scrolling) ==== */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { overflow: hidden; }            /* no scrolling */
+body {
+  margin: 0;
+  color: #111;
+  background: #f2f2f2;
+  font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   display: grid;
-  grid-template-columns: repeat(2, minmax(160px, 1fr));
-  gap: 12px;
-  max-width: 520px;
-  margin: 0 auto;
+  place-items: center;               /* center the square on screen */
 }
 
-.portal {
-  display: block;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 1px solid #e5e5e5;
-  text-decoration: none;
+/* ==== Centered square frame that fits within viewport ==== */
+.frame {
+  width: min(92vmin, 900px);        /* keep it square and responsive */
+  aspect-ratio: 1 / 1;
   background: #fff;
-}
-.portal:hover {
-  background: #fafafa;
+  border: 1px solid #e6e6e6;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+  overflow: hidden;                  /* clip inner hover effects */
+  display: grid;
 }
 
-.about-strip {
-  text-align: center;
-  color: #666;
-  border-top: 1px solid #eee;
-  padding: 16px;
+/* ==== 2x2 grid of big buttons ==== */
+.quadgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
 }
+
+/* Each quadrant is a full-cell button */
+.quad {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: #111;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #f0f0f0;        /* subtle dividers */
+  font-weight: 600;
+  font-size: clamp(16px, 3.2vmin, 28px);
+  transition: transform 0.08s ease, background 0.08s ease, box-shadow 0.08s ease;
+}
+
+/* Soft color hints per portal (adjust to taste) */
+.artist { background: linear-gradient(180deg, #fff, #fff7fb); }
+.agent  { background: linear-gradient(180deg, #fff, #f7fff7); }
+.booker { background: linear-gradient(180deg, #fff, #f7fbff); }
+.punter { background: linear-gradient(180deg, #fff, #fffaf0); }
+
+/* Hover/active states (desktop) */
+.quad:hover { background: #f9f9f9; }
+.quad:active { transform: scale(0.98); }
+
+/* Small phones: keep the square readable */
+@media (max-width: 380px) {
+  .quad { font-size: clamp(14px, 4vmin, 22px); padding: 8px; }
+}
+
+/* Optional tiny contact in the corner (overlay, non-scrolling) */
+.corner-note {
+  position: fixed;
+  bottom: 10px;
+  right: 12px;
+  font-size: 12px;
+  color: #666;
+}
+.corner-note a { color: inherit; text-decoration: underline; }
+.corner-note a:hover { text-decoration: none; }
