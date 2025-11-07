@@ -43,8 +43,7 @@ body{
 .stage{
   position:fixed; inset:0; width:100vw; height:100vh;
   isolation:isolate; pointer-events:auto;
-  /* (optional) remove any perspective tilts that could shrink bounds */
-  transform:none !important;
+  transform:none !important; /* ensure no perspective shrink */
 }
 
 /* ===== Portal page shared styles ===== */
@@ -69,9 +68,9 @@ thead th{ background:#0f1836; }
 a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
 ::selection{ background:rgba(156,226,255,.28); color:#001; }
 
-/* ===== Nests (replace bubbles) =====
+/* ===== Nests (replace bubbles)
    Keep `.bubble` for JS positioning; `.nest` controls visuals.
-   Shape: tilted ellipse (isometric bowl) + real twig rim layers. */
+   Shape: tilted ellipse (isometric bowl) + genuine twig rim layers. */
 .bubble{
   position:absolute; z-index:5; pointer-events:auto;
   width:var(--nest-size); height:calc(var(--nest-size) * 0.66);
@@ -92,14 +91,13 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
 .bubble.nest::before{
   content:""; position:absolute; inset:0; border-radius:inherit; z-index:0;
   background:
-    /* wood streaks */
     repeating-linear-gradient(14deg,  var(--twig-1) 0 3px, var(--twig-2) 3px 6px, var(--twig-3) 6px 8px),
     repeating-linear-gradient(-12deg, var(--twig-4) 0 2px, var(--twig-2) 2px 4px, var(--twig-5) 4px 6px);
   /* cut to a rim ring; heavier at the front */
   -webkit-mask:
     radial-gradient(92% 72% at 50% 52%, transparent 44%, black 58%),
     radial-gradient(140% 130% at 50% 82%, black 42%, transparent 78%);
-  mask:
+          mask:
     radial-gradient(92% 72% at 50% 52%, transparent 44%, black 58%),
     radial-gradient(140% 130% at 50% 82%, black 42%, transparent 78%);
   opacity:.9;
@@ -159,7 +157,6 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
   height: var(--twig-t, 3px);
   transform-origin: calc(var(--twig-l, 40px) * -0.12) 50%;
   border-radius: 12px / 12px;
-  /* bark texture */
   background:
     linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0)),
     repeating-linear-gradient(90deg, var(--twig-c1,#3a2d21) 0 7px, var(--twig-c2,#2b2118) 7px 14px);
@@ -168,7 +165,6 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
     0 -1px 0 rgba(0,0,0,.35) inset,
     0 2px 4px rgba(0,0,0,.45);
   z-index:3; opacity:.98;
-  /* subtle leaf/knots at tips using mask to roughen ends */
   -webkit-mask:
     radial-gradient(8px 6px at 98% 50%, black 60%, transparent 100%),
     linear-gradient(black, black);
@@ -205,15 +201,16 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
   position:fixed; inset:0; z-index:0; pointer-events:none;
   filter: drop-shadow(0 0 6px rgba(156,226,255,.25));
 }
-/* Constant-size, larger homing pigeon cursor (desktop/laptop only) */
+
+/* ===== Homing pigeon cursor (constant size on computers) ===== */
 #wp-cursor{
   position: fixed;
   left: 0; top: 0;
   z-index: 9999;
   pointer-events: none;
 
-  /* fixed size on any computer screen */
-  width: 128px;   /* ⬅️ bump this up or down to taste (e.g., 140px) */
+  /* fixed size on any computer screen — adjust if you want even bigger */
+  width: 140px;  /* was 128px; bumped for more presence */
   height: auto;
 
   transform: translate3d(-9999px,-9999px,0);
@@ -221,13 +218,8 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
     drop-shadow(0 2px 1px rgba(255,255,255,.06))
     drop-shadow(0 12px 22px rgba(0,0,0,.45));
 }
-
-#wp-cursor svg {
-  transform-origin: 50% 50%;
-}
-#wp-cursor.cursor--burst svg {
-  transform: scale(1.08); /* slightly larger when burst */
-}
+#wp-cursor svg { transform-origin: 50% 50%; }
+#wp-cursor.cursor--burst svg { transform: scale(1.08); }
 
 /* Wing rigs (150x96 viewBox shoulder ~64,44) */
 #wp-cursor svg #wing-R, #wp-cursor svg #wing-L { transform-origin: 64px 44px; }
@@ -251,6 +243,11 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
 #wp-cursor.cursor--burst svg #wing-R { animation: dp-burst-R 700ms ease-in-out infinite !important; }
 #wp-cursor.cursor--burst svg #wing-L { animation: dp-burst-L 700ms ease-in-out infinite !important; }
 #wp-cursor.cursor--burst svg         { animation: dp-body-burst 700ms ease-in-out infinite !important; }
+
+/* ===== Hide the OS cursor completely on desktop/laptop ===== */
+@media (pointer: fine) {
+  html, body, * { cursor: none !important; }
+}
 
 /* Motion prefs */
 @media (max-width:640px){
