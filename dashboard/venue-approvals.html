@@ -5,8 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Venue Approvals · The Drifting Pigeon</title>
   <link rel="stylesheet" href="../style.css" />
+</head>
+<body class="portal-body">
+  <main class="portal-content">
+    <a class="back-link" href="../venue-supervisor.html">← Back to Venue Supervisor</a>
+    <h1>Venue Booker Approvals</h1>
+    <div id="list"></div>
+  </main>
+
   <script type="module" src="../pigeon.js"></script>
-  <script type="module" src="../scripts/auth.js"></script>
   <script type="module">
     import { sb, approveRequest, requireAuthOrSendTo } from '../scripts/auth.js';
 
@@ -66,15 +73,6 @@
 
     window.addEventListener('DOMContentLoaded', load);
   </script>
-</head>
-<body class="portal-body">
-  <main class="portal-content">
-    <a class="back-link" href="../venue-supervisor.html">← Back to Venue Supervisor</a>
-    <h1>Venue Booker Approvals</h1>
-    <div id="list"></div>
-  </main>
-  <script type="module" src="pigeon.js"></script>
-<script type="module" src="scripts/auth.js"></script>
-<script type="module" src="scripts/cursor.js"></script>
+  <script type="module" src="../scripts/cursor.js"></script>
 </body>
 </html>
