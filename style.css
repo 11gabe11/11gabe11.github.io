@@ -127,16 +127,21 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
   z-index:0;
 }
 
-/* Label chip – float near back rim, counter-tilted for legibility */
+/* Label chip (sign-in type) */
 .bubble.nest > span{
-  position:absolute; left:50%; top:-2%;
-  transform: translate(-50%, 0) rotateX(-32deg);
-  background: rgba(0,0,0,.38);
-  padding:.42rem .72rem; border-radius:999px;
-  font-weight:700; letter-spacing:.05em; font-size: clamp(12px,1.8vw,14px);
+  position:absolute; top:-4%; left:50%;
+  transform: translate(-50%, 0) rotateX(-28deg);
+  background: rgba(0,0,0,.45);
+  padding:.42rem .72rem;
+  border-radius:999px;
+  font-weight:700;
+  letter-spacing:.05em;
+  font-size: clamp(12px,1.8vw,14px);
   text-transform:uppercase;
-  box-shadow:0 2px 8px rgba(0,0,0,.35);
-  z-index:2;
+  white-space:nowrap;
+  color:var(--fg-0);
+  box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
+  z-index:3;
 }
 
 /* Eggs — sit inside bowl; counter-tilted to face viewer */
