@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Venue Supervisor · The Drifting Pigeon</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="pigeon.js"></script>
+  <script type="module" src="scripts/auth.js"></script>
+  <script type="module">
+    import { requireAuthOrSendTo } from './scripts/auth.js';
+    window.addEventListener('DOMContentLoaded', async () => {
+      await requireAuthOrSendTo();
+    });
+  </script>
+</head>
+<body class="portal-body">
+  <main class="portal-content">
+    <a class="back-link" href="venue.html">← Back to Venue</a>
+    <h1>Venue Supervisor</h1>
+    <p class="lede">Approve Venue Booker requests for your venue.</p>
+    <p><a class="button" href="dashboard/venue-approvals.html">Open Approval Dashboard</a></p>
+  </main>
+</body>
+</html>
