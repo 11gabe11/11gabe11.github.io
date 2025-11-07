@@ -1,4 +1,4 @@
-/* ===== The Drifting Pigeon — Nests Edition ===== */
+/* ===== The Drifting Pigeon — Nests Edition (Isometric Twig Bowls + Real Pigeon Cursor) ===== */
 * { box-sizing: border-box; }
 :root{
   /* palette */
@@ -62,22 +62,12 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
    Keep `.bubble` for JS positioning, add `.nest` for visuals. */
 .bubble{
   position:absolute; z-index:5; pointer-events:auto;
-  width:var(--nest-size); height:var(--nest-size); border-radius:50%;
+  width:var(--nest-size); height:calc(var(--nest-size) * 0.68); /* ellipse footprint for side-on */
+  border-radius:50% / 42% 42% 58% 58%;
   text-decoration:none; color:var(--fg-0);
   display:block; outline:none; border:0;
-}
-
-/* ===== Isometric Twig-Bowl Nests ===== */
-.bubble{ /* keep for JS positioning; visual handled below */
-  --size: clamp(120px, 18vw, 220px);
-  position:absolute; display:block; text-decoration:none; color:var(--fg-0);
-  width:var(--size); height:calc(var(--size) * 0.68); /* flatter than tall */
-  /* ellipse footprint so physics still OK while visuals tilt */
-  border-radius:50% / 42% 42% 58% 58%;
-  outline:0; border:0;
-  /* soft ground shadow */
-  background:
-    radial-gradient(120% 50% at 50% 98%, rgba(0,0,0,.35), transparent 60%) no-repeat;
+  /* soft ground shadow under bowl */
+  background: radial-gradient(120% 50% at 50% 98%, rgba(0,0,0,.35), transparent 60%) no-repeat;
 }
 
 /* Visual bowl + tilt */
@@ -88,22 +78,18 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
   filter: drop-shadow(0 12px 26px rgba(0,0,0,.5));
 }
 
-/* = Rim made of many small twigs
-   We build a thick ring and carve it with a mask so it reads heavier at the front. */
+/* = Rim made of many small twigs (painted texture ring; bulk of twigs are DOM .twig children) */
 .bubble.nest::before{
   content:""; position:absolute; inset:0; border-radius:inherit; z-index:1;
-  /* twig bundle: several fine, offset, repeating strokes at different angles */
   background:
-    /* coarse twig band */
     repeating-linear-gradient(12deg,  #3a2d21 0 3px, #2b2118 3px 6px, #1f170f 6px 8px),
     repeating-linear-gradient(-9deg,  #3c2e22 0 2px, #2e241a 2px 4px, #241b12 4px 6px),
     repeating-linear-gradient(25deg,  #3b2e21 0 2px, #2a2017 2px 3px, #1f170f 3px 5px),
     repeating-linear-gradient(-28deg, #3a2b1e 0 2px, #2a2117 2px 3px, #20160f 3px 5px),
-    radial-gradient(120% 100% at 50% 65%, rgba(0,0,0,.18), transparent 60%); /* grime */
-  /* carve a bowl-rim ring that’s thicker at the bottom/front */
+    radial-gradient(120% 100% at 50% 65%, rgba(0,0,0,.18), transparent 60%);
   -webkit-mask:
-    radial-gradient(90% 70% at 50% 52%, transparent 45%, black 58%) /* inner cut */,
-    radial-gradient(130% 120% at 50% 76%, black 40%, transparent 75%); /* fade back */
+    radial-gradient(90% 70% at 50% 52%, transparent 45%, black 58%),
+    radial-gradient(130% 120% at 50% 76%, black 40%, transparent 75%);
   mask:
     radial-gradient(90% 70% at 50% 52%, transparent 45%, black 58%),
     radial-gradient(130% 120% at 50% 76%, black 40%, transparent 75%);
@@ -147,13 +133,11 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
 /* Eggs — sit inside bowl; counter-tilted to face viewer */
 .bubble.nest .egg{
   position:absolute; bottom:18%;
-  width: clamp(18px, 5vw, 30px); height: clamp(24px, 7vw, 38px);
-  background:
-    radial-gradient(55% 55% at 40% 35%, #ffffff, #e8f3ff 38%, #c5d8e6 70%);
+  width: var(--egg-w); height: var(--egg-h);
+  background: radial-gradient(55% 55% at 40% 35%, #ffffff, #e8f3ff 38%, #c5d8e6 70%);
   border-radius:50% 50% 47% 47% / 60% 60% 40% 40%;
   box-shadow: inset 0 -6px 10px rgba(0,0,0,.18), 0 6px 10px rgba(0,0,0,.35);
   transform-origin:center bottom;
-  /* cancel parent tilt a bit so they feel upright */
   transform: rotateX(-28deg);
   z-index:1;
 }
@@ -162,19 +146,31 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
 .bubble.nest .egg:nth-of-type(2){ left:50%; transform:translateX(-50%) rotateX(-28deg) rotate(2deg); z-index:2; }
 .bubble.nest .egg:nth-of-type(3){ right:28%; transform:rotateX(-28deg) rotate(6deg); }
 
-/* egg count helpers (unchanged behaviour) */
+/* egg count helpers */
 .bubble.nest.eggs-0 .egg{ display:none; }
 .bubble.nest.eggs-1 .egg:nth-of-type(n+2){ display:none; }
 .bubble.nest.eggs-2 .egg:nth-of-type(n+3){ display:none; }
 
+/* Procedural twig elements (added by JS) */
+.bubble.nest .twig{
+  position:absolute; left:50%; top:60%;
+  width: var(--twig-l, 32px);
+  height: var(--twig-t, 3px);
+  transform-origin: calc(var(--twig-l, 32px) * -0.1) 50%;
+  border-radius:8px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,0)),
+    linear-gradient(90deg, var(--twig-c1, #3a2d21), var(--twig-c2, #2b2118));
+  box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 -1px 0 rgba(0,0,0,.25) inset, 0 2px 4px rgba(0,0,0,.35);
+  z-index:2; opacity:.98;
+  animation: dp-twig-sway 3000ms ease-in-out infinite;
+}
+@keyframes dp-twig-sway { 0%,100% { transform: var(--twig-tf) rotate(0.6deg); } 50% { transform: var(--twig-tf) rotate(-0.6deg); } }
+.bubble.nest:hover .twig{ animation-duration:2600ms; opacity:1; }
+
 /* Focus/hover */
-.bubble.nest:hover{
-  filter: drop-shadow(0 16px 34px rgba(0,0,0,.65));
-}
-.bubble.nest:focus-visible{
-  outline:none;
-  box-shadow: 0 0 0 6px var(--ring);
-}
+.bubble.nest:hover{ filter: drop-shadow(0 16px 34px rgba(0,0,0,.65)); }
+.bubble.nest:focus-visible{ outline:none; box-shadow: 0 0 0 6px var(--ring); }
 
 /* Original diamond placement retained (JS animates absolute left/top) */
 .bubble.artist{ left:50%; top:8%; transform:translate(-50%,0); }
@@ -195,38 +191,37 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
   filter: drop-shadow(0 0 6px rgba(156,226,255,.25));
 }
 
-/* ===== Custom cursor — optional (desktop only) ===== */
-@media (pointer: fine) {
-  html, body, *, a, button, .bubble { cursor: none !important; }
-}
+/* ===== Custom cursor — Realistic Homing Pigeon (desktop only) ===== */
+@media (pointer: fine) { html, body, *, a, button, .bubble { cursor: none !important; } }
 #wp-cursor{
   position:fixed; left:0; top:0; z-index:9999; pointer-events:none;
-  width:clamp(28px,3.6vmin,40px); height:auto;
+  width:clamp(28px,3.8vmin,44px); height:auto;
   transform:translate3d(-9999px,-9999px,0);
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,.05)) drop-shadow(0 8px 18px rgba(0,0,0,.35));
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.06)) drop-shadow(0 10px 20px rgba(0,0,0,.35));
 }
-/* Wing rigs (120x80 viewBox shoulder ~48,40) */
-#wp-cursor svg #wp-wing-R, #wp-cursor svg #wp-wing-L { transform-origin: 48px 40px; }
-@keyframes wp-flap-R { 0%{transform:rotate(18deg)} 30%{transform:rotate(-46deg)} 60%{transform:rotate(-40deg)} 100%{transform:rotate(18deg)} }
-@keyframes wp-flap-L { 0%{transform:rotate(-18deg)} 30%{transform:rotate(46deg)} 60%{transform:rotate(40deg)} 100%{transform:rotate(-18deg)} }
-#wp-cursor svg #wp-wing-R { animation: wp-flap-R 720ms ease-in-out infinite; }
-#wp-cursor svg #wp-wing-L { animation: wp-flap-L 720ms ease-in-out infinite; }
-@keyframes wp-body-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.6px)} }
-#wp-cursor svg{ animation: wp-body-bob 720ms ease-in-out infinite; }
+/* Wing rigs (140x90 viewBox shoulder ~60,42) */
+#wp-cursor svg #wing-R, #wp-cursor svg #wing-L { transform-origin: 60px 42px; }
+@keyframes dp-flap-R { 0%{transform:rotate(16deg)} 30%{transform:rotate(-44deg)} 60%{transform:rotate(-36deg)} 100%{transform:rotate(16deg)} }
+@keyframes dp-flap-L { 0%{transform:rotate(-16deg)} 30%{transform:rotate(44deg)} 60%{transform:rotate(36deg)} 100%{transform:rotate(-16deg)} }
+@keyframes dp-body   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.7px)} }
+#wp-cursor svg #wing-R { animation: dp-flap-R 720ms ease-in-out infinite; }
+#wp-cursor svg #wing-L { animation: dp-flap-L 720ms ease-in-out infinite; }
+#wp-cursor svg         { animation: dp-body   720ms ease-in-out infinite; }
 
 /* Glide/Burst variants (class toggles on #wp-cursor) */
-@keyframes wp-glide-R { 0%,100%{transform:rotate(6deg)} 50%{transform:rotate(0)} }
-@keyframes wp-glide-L { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(0)} }
-@keyframes wp-burst-R { 0%{transform:rotate(22deg)} 30%{transform:rotate(-52deg)} 60%{transform:rotate(-40deg)} 100%{transform:rotate(22deg)} }
-@keyframes wp-burst-L { 0%{transform:rotate(-22deg)} 30%{transform:rotate(52deg)} 60%{transform:rotate(40deg)} 100%{transform:rotate(-22deg)} }
-@keyframes wp-body-glide { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.4px)} }
-@keyframes wp-body-burst { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.2px)} }
-#wp-cursor.cursor--glide svg #wp-wing-R { animation: wp-glide-R 1600ms ease-in-out infinite !important; }
-#wp-cursor.cursor--glide svg #wp-wing-L { animation: wp-glide-L 1600ms ease-in-out infinite !important; }
-#wp-cursor.cursor--glide svg            { animation: wp-body-glide 1600ms ease-in-out infinite !important; }
-#wp-cursor.cursor--burst svg #wp-wing-R { animation: wp-burst-R 700ms ease-in-out infinite !important; }
-#wp-cursor.cursor--burst svg #wp-wing-L { animation: wp-burst-L 700ms ease-in-out infinite !important; }
-#wp-cursor.cursor--burst svg            { animation: wp-body-burst 700ms ease-in-out infinite !important; }
+@keyframes dp-glide-R { 0%,100%{transform:rotate(6deg)} 50%{transform:rotate(0)} }
+@keyframes dp-glide-L { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(0)} }
+@keyframes dp-body-glide { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.4px)} }
+#wp-cursor.cursor--glide svg #wing-R { animation: dp-glide-R 1600ms ease-in-out infinite !important; }
+#wp-cursor.cursor--glide svg #wing-L { animation: dp-glide-L 1600ms ease-in-out infinite !important; }
+#wp-cursor.cursor--glide svg         { animation: dp-body-glide 1600ms ease-in-out infinite !important; }
+
+@keyframes dp-burst-R { 0%{transform:rotate(22deg)} 30%{transform:rotate(-52deg)} 60%{transform:rotate(-40deg)} 100%{transform:rotate(22deg)} }
+@keyframes dp-burst-L { 0%{transform:rotate(-22deg)} 30%{transform:rotate(52deg)} 60%{transform:rotate(40deg)} 100%{transform:rotate(-22deg)} }
+@keyframes dp-body-burst { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.1px)} }
+#wp-cursor.cursor--burst svg #wing-R { animation: dp-burst-R 700ms ease-in-out infinite !important; }
+#wp-cursor.cursor--burst svg #wing-L { animation: dp-burst-L 700ms ease-in-out infinite !important; }
+#wp-cursor.cursor--burst svg         { animation: dp-body-burst 700ms ease-in-out infinite !important; }
 
 /* Page-leave micro transition (click swoop) */
 body.leaving .bubble.nest { opacity:.12; transition: opacity .35s ease, transform .35s ease; }
@@ -241,6 +236,6 @@ body.leaving .bubble.nest._clicked { opacity:1; transform: scale(1.05); }
 }
 
 @media (prefers-reduced-motion: reduce){
-  #wp-cursor svg, #wp-cursor svg #wp-wing-R, #wp-cursor svg #wp-wing-L { animation:none; }
+  #wp-cursor svg, #wp-cursor svg #wing-R, #wp-cursor svg #wing-L { animation:none !important; }
   .bubble{ transition:none; }
 }
