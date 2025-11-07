@@ -134,3 +134,14 @@ a{ color:var(--gold-1); } a:hover{ color:#ffe09a; }
 @media (prefers-reduced-motion:reduce){
   #wp-cursor svg #wp-wing-top,#wp-cursor svg #wp-wing-bot{ animation:none; }
 }
+
+/* Hide native cursor absolutely everywhere on precise pointers */
+@media (pointer: fine) {
+  html, body, *, a, button, .bubble { cursor: none !important; }
+}
+
+/* Ensure the custom cursor is always clickable-safe and on top */
+#wp-cursor {
+  pointer-events: none;
+  z-index: 9999;
+}
