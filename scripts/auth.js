@@ -1,5 +1,5 @@
-// scripts/auth.js — unified auth helpers for all portals
-// Uses the sb client exported from /pigeon.js
+// scripts/auth.js — unified auth helpers + sign-in/up + logout + routing
+// Uses the single Supabase client exported from /pigeon.js
 
 import { sb } from '../pigeon.js';
 
@@ -37,8 +37,6 @@ export async function currentProfile() {
 export async function gateByVerificationOrPending(pendingHref = 'pending.html') {
   const prof = await currentProfile();
   if (!prof) { location.href = 'auth.html'; return false; }
-
-  // roles that require verification
   const needsVerification = (prof.role_id === 'agent' || prof.role_id === 'venue_booker');
   if (needsVerification && !prof.is_verified) {
     location.href = pendingHref;
@@ -47,14 +45,27 @@ export async function gateByVerificationOrPending(pendingHref = 'pending.html') 
   return true;
 }
 
-/**
- * Approve/Reject a verification request.
- * - Looks up the request to get requester_id
- * - Updates verification_requests.status
- * - If approved, flips profiles.is_verified for requester
- */
+/** Route the user to the appropriate portal page based on profile + verification. */
+export async function routeAfterLogin() {
+  const p = await currentProfile();
+  if (!p) { location.href = 'auth.html'; return; }
+
+  // Roles that require supervisor/central approval
+  const needsVerification = (p.role_id === 'agent' || p.role_id === 'venue_booker');
+  if (needsVerification && !p.is_verified) { location.href = 'pending.html'; return; }
+
+  switch (p.role_id) {
+    case 'artist':            location.href = 'artist.html'; break;
+    case 'agent':             location.href = 'agent.html'; break;
+    case 'punter':            location.href = 'punter.html'; break;
+    case 'venue_supervisor':  location.href = 'venue-supervisor.html'; break;
+    case 'venue_booker':      location.href = 'venue-booker.html'; break;
+    default:                  location.href = './'; // fallback to home
+  }
+}
+
+/** Approve/Reject a verification request. */
 export async function approveRequest(requestId, approve = true, reason = null) {
-  // 1) Get the request row (requester_id)
   const { data: reqRow, error: readErr } = await sb
     .from('verification_requests')
     .select('id, requester_id')
@@ -63,7 +74,6 @@ export async function approveRequest(requestId, approve = true, reason = null) {
   if (readErr) throw new Error('[approveRequest] read error: ' + readErr.message);
   if (!reqRow) throw new Error('[approveRequest] request not found');
 
-  // 2) Update the request status
   const { error: updErr } = await sb
     .from('verification_requests')
     .update({
@@ -74,7 +84,6 @@ export async function approveRequest(requestId, approve = true, reason = null) {
     .eq('id', requestId);
   if (updErr) throw new Error('[approveRequest] update error: ' + updErr.message);
 
-  // 3) If approved, mark the requester profile as verified
   if (approve) {
     const { error: profErr } = await sb
       .from('profiles')
@@ -84,6 +93,58 @@ export async function approveRequest(requestId, approve = true, reason = null) {
   }
 
   return true;
+}
+
+/** Email + password sign-in. */
+export async function signInWithEmail(email, password) {
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/**
+ * Email + password sign-up.
+ * - Creates auth user
+ * - Inserts/Upserts a profile row
+ * - If role is venue_booker, optionally creates a verification request directed to a supervisor email
+ */
+export async function signUp({ email, password, displayName, roleId, supervisorEmail }) {
+  const { data: sign, error: signErr } = await sb.auth.signUp({ email, password });
+  if (signErr) throw new Error(signErr.message);
+
+  const userId = sign.user?.id;
+  if (!userId) throw new Error('No user id returned from sign-up.');
+
+  // Add/overwrite profile
+  const profile = {
+    user_id: userId,
+    email: email.toLowerCase(),
+    display_name: displayName ?? null,
+    role_id: roleId,
+    is_verified: false
+  };
+  const { error: profErr } = await sb.from('profiles').upsert(profile, { onConflict: 'user_id' });
+  if (profErr) throw new Error(profErr.message);
+
+  // If venue_booker, create a targeted verification request
+  if (roleId === 'venue_booker' && supervisorEmail) {
+    const payload = {
+      requester_id: userId,
+      role_requested: 'venue_booker',
+      status: 'pending',
+      target_supervisor_email: supervisorEmail.toLowerCase()
+    };
+    const { error: vrErr } = await sb.from('verification_requests').insert(payload);
+    if (vrErr) throw new Error('[verification] ' + vrErr.message);
+  }
+
+  return sign;
+}
+
+/** Sign out and return to auth page. */
+export async function logout(redirect = 'auth.html') {
+  await sb.auth.signOut();
+  location.href = redirect;
 }
 
 // Re-export the Supabase client for dashboards that may need it.
