@@ -1,32 +1,28 @@
-// scripts.js — floating, colliding portal bubbles (no unlock)
+// scripts.js — The Wandering Pigeon
 document.addEventListener("DOMContentLoaded", () => {
-  document.addEventListener("DOMContentLoaded", () => {
-    document.addEventListener("DOMContentLoaded", () => {
-  // --- The Wandering Pigeon: custom cursor (desktop only) ---
+  /* ================================
+   *  Custom cursor (desktop only)
+   *  - SVG viewBox is 96x64
+   *  - Beak tip hotspot ≈ (90, 26)
+   * ================================ */
   const useCustomCursor = window.matchMedia("(pointer: fine)").matches;
   const cursorEl = document.getElementById("wp-cursor");
 
   if (useCustomCursor && cursorEl) {
-    // The SVG viewBox is 96x64; beak tip is roughly at (90, 26).
     const VIEW_W = 96, VIEW_H = 64;
-    const BEAK_X = 90, BEAK_Y = 26;  // hotspot inside the viewBox
-
+    const BEAK_X = 90, BEAK_Y = 26; // hotspot inside viewBox
     let lastX = 0, lastY = 0, rafId = null;
 
     function place(x, y) {
-      const r = cursorEl.getBoundingClientRect();
-      const renderedW = r.width || 32;
-      const renderedH = renderedW * (VIEW_H / VIEW_W);
-      const offsetX = renderedW * (BEAK_X / VIEW_W);
-      const offsetY = renderedH * (BEAK_Y / VIEW_H);
+      const w = cursorEl.getBoundingClientRect().width || 32;
+      const h = w * (VIEW_H / VIEW_W);
+      const offsetX = w * (BEAK_X / VIEW_W);
+      const offsetY = h * (BEAK_Y / VIEW_H);
       cursorEl.style.transform = `translate3d(${x - offsetX}px, ${y - offsetY}px, 0)`;
     }
-
     function onMove(e) {
       lastX = e.clientX; lastY = e.clientY;
-      if (!rafId) {
-        rafId = requestAnimationFrame(() => { place(lastX, lastY); rafId = null; });
-      }
+      if (!rafId) rafId = requestAnimationFrame(() => { place(lastX, lastY); rafId = null; });
     }
 
     window.addEventListener("mousemove", onMove, { passive: true });
@@ -35,99 +31,61 @@ document.addEventListener("DOMContentLoaded", () => {
       cursorEl.style.transform = "translate3d(-9999px,-9999px,0)";
     });
   }
-  // --- end custom cursor ---
-  
-  // ... your floating-bubbles code continues below ...
-});
 
-  // --- Custom pigeon cursor (desktop only) ---
-  const useCustomCursor = window.matchMedia("(pointer: fine)").matches;
-  const cursorEl = document.getElementById("wp-cursor");
-
-  if (useCustomCursor && cursorEl) {
-    // Beak hotspot offset (relative to the SVG size we render)
-    // Our SVG viewBox is 64x48; the beak tip sits around (56, 20).
-    // We scale the SVG via CSS width; compute offset dynamically.
-    const hotspot = { x: 56/64, y: 20/48 }; // as proportions of the SVG box
-
-    let lastX = 0, lastY = 0;
-    let rafId = null;
-
-    function place(x, y) {
-      // Size of the rendered SVG
-      const renderedW = cursorEl.getBoundingClientRect().width || 32;
-      const renderedH = renderedW * (48/64);
-      const offsetX = renderedW * hotspot.x;
-      const offsetY = renderedH * hotspot.y;
-
-      cursorEl.style.transform = `translate3d(${x - offsetX}px, ${y - offsetY}px, 0)`;
-    }
-
-    function onMove(e) {
-      lastX = e.clientX;
-      lastY = e.clientY;
-      if (!rafId) {
-        rafId = requestAnimationFrame(() => {
-          place(lastX, lastY);
-          rafId = null;
-        });
-      }
-    }
-
-    window.addEventListener("mousemove", onMove, { passive: true });
-    // Show immediately at first move
-    window.addEventListener("mousemove", (e) => place(e.clientX, e.clientY), { once: true });
-
-    // Optional: hide when leaving window
-    window.addEventListener("mouseleave", () => {
-      cursorEl.style.transform = "translate3d(-9999px,-9999px,0)";
-    });
-  }
-  // --- end custom cursor ---
-  
-  // ... your floating-bubbles code continues below ...
-});
-
-  // ✅ make sure all bubbles are always clickable (safety override)
-document.querySelectorAll('.bubble').forEach(b => {
-  b.style.pointerEvents = "auto";
-});
-
+  /* ======================================
+   *  Floating, colliding portal bubbles
+   *  - Clickable <a.bubble> links
+   *  - Perfect circles (size from CSS)
+   * ====================================== */
   const stage = document.getElementById("stage");
   if (!stage) return;
 
+  // ensure bubbles are clickable and positioned absolutely
   const bubbles = Array.from(stage.querySelectorAll(".bubble"));
+  bubbles.forEach(b => {
+    b.style.position = "absolute";
+    b.style.willChange = "left, top";
+    b.style.pointerEvents = "auto";
+  });
 
-  // helpers
-  function pxFromPercent(pct, sizePx){ return (pct / 100) * sizePx; }
+  // speed controls (px per millisecond)
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const SPEED_MIN = prefersReducedMotion ? 0.006 : 0.016; // gentle drift
+  const SPEED_MAX = prefersReducedMotion ? 0.012 : 0.022;
+
+  function randSpeed() {
+    const v = Math.random() * (SPEED_MAX - SPEED_MIN) + SPEED_MIN;
+    return (Math.random() < 0.5 ? -v : v);
+  }
+
+  // state
+  const nodes = bubbles.map(el => ({
+    el,
+    x: 0, y: 0,
+    vx: randSpeed(),
+    vy: randSpeed(),
+    r:  0 // computed from actual rendered size
+  }));
 
   let W = stage.clientWidth;
   let H = stage.clientHeight;
 
-  // bubble state
-// --- speed controls (px per millisecond) ---
-const SPEED_MIN = 0.016;   // very slow
-const SPEED_MAX = 0.022;   // still slow
-function randSpeed(){ return (Math.random() * (SPEED_MAX - SPEED_MIN) + SPEED_MIN) * (Math.random() < 0.5 ? -1 : 1); }
+  // measure radius from real DOM size (keeps circles perfect across devices)
+  function measureRadii() {
+    nodes.forEach(n => {
+      const rect = n.el.getBoundingClientRect();
+      n.r = rect.width / 2; // aspect-ratio:1/1 in CSS ensures width==height
+    });
+  }
 
-const nodes = bubbles.map(el => ({
-  el,
-  x: 0, y: 0,
-  vx: randSpeed(),
-  vy: randSpeed(),
-  r:  0
-}));
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
 
-  // initial layout
-  function initializeLayout(){
+  // initial layout (seed in a 2x2 grid, then clamp inside)
+  function initializeLayout() {
     W = stage.clientWidth;
     H = stage.clientHeight;
 
-    nodes.forEach(n => {
-      const diameterPct = 22; // match --d in CSS
-      const d = pxFromPercent(diameterPct, Math.min(W, H));
-      n.r = d / 2;
-    });
+    measureRadii();
 
     const cols = 2, rows = 2;
     const pad = 12;
@@ -135,64 +93,76 @@ const nodes = bubbles.map(el => ({
     nodes.forEach((n, i) => {
       const c = i % cols;
       const r = Math.floor(i / cols);
-      n.x = (c + 0.5) * (W / cols) + (Math.random() * 20 - 10);
-      n.y = (r + 0.5) * (H / rows) + (Math.random() * 20 - 10);
-      n.x = Math.max(n.r + pad, Math.min(W - n.r - pad, n.x));
-      n.y = Math.max(n.r + pad, Math.min(H - n.r - pad, n.y));
-      n.el.style.position = "absolute";
+      const cellW = W / cols, cellH = H / rows;
+
+      // seed near cell centers with a tiny random nudge
+      n.x = (c + 0.5) * cellW + (Math.random() * 20 - 10);
+      n.y = (r + 0.5) * cellH + (Math.random() * 20 - 10);
+
+      // clamp inside walls
+      n.x = clamp(n.x, n.r + pad, W - n.r - pad);
+      n.y = clamp(n.y, n.r + pad, H - n.r - pad);
+
+      // write initial position
       n.el.style.left = (n.x - n.r) + "px";
       n.el.style.top  = (n.y - n.r) + "px";
-      n.el.style.willChange = "left, top";
     });
   }
 
-  // collisions (equal mass, elastic)
-  function resolveCollision(a, b){
+  // elastic collision (equal mass)
+  function resolveCollision(a, b) {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const dist = Math.hypot(dx, dy) || 0.0001;
     const overlap = a.r + b.r - dist;
     if (overlap <= 0) return;
 
+    // push apart
     const nx = dx / dist, ny = dy / dist;
     const sep = overlap / 2 + 0.5;
     a.x -= nx * sep; a.y -= ny * sep;
     b.x += nx * sep; b.y += ny * sep;
 
+    // reflect velocities along the normal if approaching
     const rvx = b.vx - a.vx;
     const rvy = b.vy - a.vy;
     const rel = rvx * nx + rvy * ny;
-    if (rel < 0){
-      const j = -rel;
+    if (rel < 0) {
+      const j = -rel; // perfectly elastic, equal mass
       a.vx -= nx * j; a.vy -= ny * j;
       b.vx += nx * j; b.vy += ny * j;
     }
   }
 
-  // walls
-  function contain(n){
-    if (n.x - n.r <= 0){ n.x = n.r; n.vx = Math.abs(n.vx); }
-    if (n.x + n.r >= W){ n.x = W - n.r; n.vx = -Math.abs(n.vx); }
-    if (n.y - n.r <= 0){ n.y = n.r; n.vy = Math.abs(n.vy); }
-    if (n.y + n.r >= H){ n.y = H - n.r; n.vy = -Math.abs(n.vy); }
+  // wall containment
+  function contain(n) {
+    if (n.x - n.r <= 0)   { n.x = n.r;       n.vx = Math.abs(n.vx); }
+    if (n.x + n.r >= W)   { n.x = W - n.r;   n.vx = -Math.abs(n.vx); }
+    if (n.y - n.r <= 0)   { n.y = n.r;       n.vy = Math.abs(n.vy); }
+    if (n.y + n.r >= H)   { n.y = H - n.r;   n.vy = -Math.abs(n.vy); }
   }
 
-  function draw(){
+  function draw() {
     nodes.forEach(n => {
       n.el.style.left = (n.x - n.r) + "px";
       n.el.style.top  = (n.y - n.r) + "px";
     });
   }
 
+  // main loop
   let last = performance.now();
-  function tick(now){
-    const dt = Math.min(32, now - last); // ms
+  function tick(now) {
+    const dt = Math.min(32, now - last); // clamp delta for stability
     last = now;
 
-    nodes.forEach(n => { n.x += n.vx * dt; n.y += n.vy * dt; contain(n); });
+    nodes.forEach(n => {
+      n.x += n.vx * dt;
+      n.y += n.vy * dt;
+      contain(n);
+    });
 
-    for (let i = 0; i < nodes.length; i++){
-      for (let j = i + 1; j < nodes.length; j++){
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
         resolveCollision(nodes[i], nodes[j]);
       }
     }
@@ -201,11 +171,14 @@ const nodes = bubbles.map(el => ({
     requestAnimationFrame(tick);
   }
 
-  const ro = new ResizeObserver(() => initializeLayout());
+  // re-measure on resize/orientation change
+  const ro = new ResizeObserver(() => {
+    initializeLayout();
+  });
   ro.observe(stage);
 
   initializeLayout();
   requestAnimationFrame(tick);
 
-  console.log("✅ Floating bubbles active (no unlock).");
+  console.log("✅ Bubbles + pigeon cursor ready.");
 });
