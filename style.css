@@ -88,4 +88,122 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
 
 /* Inner mossy bowl */
 .bubble.nest::after{
-  content:""; position:absolute; inset:10%; borde
+  content:""; position:absolute; inset:10%; border-radius:50%;
+  background:
+    radial-gradient(60% 60% at 50% 35%, #2b3a2e, #1e2a22 60%, #0e1511 100%);
+  box-shadow:
+    inset 0 15px 30px rgba(255,255,255,.06),
+    inset 0 -25px 40px rgba(0,0,0,.55);
+}
+
+/* Label chip */
+.bubble.nest > span{
+  position:absolute; top:14%; left:50%; transform:translateX(-50%);
+  background: rgba(0,0,0,.35); padding:.4rem .7rem; border-radius:999px;
+  font-weight:700; letter-spacing:.05em; font-size: clamp(12px, 1.8vw, 14px);
+  text-transform:uppercase;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
+
+/* Eggs (up to 3) */
+.bubble.nest .egg{
+  position:absolute; bottom:18%;
+  width: var(--egg-w); height: var(--egg-h);
+  background: radial-gradient(55% 55% at 40% 35%, #ffffff, #e8f3ff 38%, #c5d8e6 70%);
+  border-radius: 50% 50% 47% 47% / 60% 60% 40% 40%; /* egg shape */
+  box-shadow: inset 0 -6px 10px rgba(0,0,0,.18), 0 6px 10px rgba(0,0,0,.35);
+  transform-origin:center bottom;
+  will-change: transform;
+}
+
+/* positions for three eggs */
+.bubble.nest .egg:nth-of-type(1){ left:28%; transform:rotate(-6deg); }
+.bubble.nest .egg:nth-of-type(2){ left:50%; transform:translateX(-50%) rotate(2deg); z-index:2; }
+.bubble.nest .egg:nth-of-type(3){ right:28%; transform:rotate(6deg); }
+
+/* show/hide variants from HTML class (eggs-0/1/2/3) */
+.bubble.nest.eggs-0 .egg{ display:none; }
+.bubble.nest.eggs-1 .egg:nth-of-type(n+2){ display:none; }
+.bubble.nest.eggs-2 .egg:nth-of-type(n+3){ display:none; }
+/* eggs-3 shows all three by default */
+
+/* Hover/focus affordances */
+.bubble.nest:hover{
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,.6));
+}
+.bubble.nest:focus-visible{
+  box-shadow:
+    inset 0 0 0 10px rgba(156,226,255,.20),
+    inset 0 0 0 14px rgba(156,226,255,.12),
+    0 0 0 6px var(--ring);
+  outline:none;
+}
+
+/* Original diamond placement retained (JS animates absolute left/top) */
+.bubble.artist{ left:50%; top:8%; transform:translate(-50%,0); }
+.bubble.agent { left:5%; top:50%; transform:translate(0,-50%); }
+.bubble.venue { right:5%; top:50%; transform:translate(0,-50%); }
+.bubble.punter{ left:50%; bottom:6%; transform:translate(-50%,0); }
+
+/* ===== Footer ===== */
+.corner-note{
+  position:fixed; right:14px; bottom:10px; font-size:.9rem; opacity:.8; z-index:10;
+}
+.corner-note a{ color:var(--accent); text-decoration:none; border-bottom:1px dashed transparent; }
+.corner-note a:hover{ border-bottom-color:var(--accent); }
+
+/* Ambient SVG layer used by pigeon.js */
+#sky, #sparks{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  filter: drop-shadow(0 0 6px rgba(156,226,255,.25));
+}
+
+/* ===== Custom cursor — optional (desktop only) ===== */
+@media (pointer: fine) {
+  html, body, *, a, button, .bubble { cursor: none !important; }
+}
+#wp-cursor{
+  position:fixed; left:0; top:0; z-index:9999; pointer-events:none;
+  width:clamp(28px,3.6vmin,40px); height:auto;
+  transform:translate3d(-9999px,-9999px,0);
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.05)) drop-shadow(0 8px 18px rgba(0,0,0,.35));
+}
+/* Wing rigs (120x80 viewBox shoulder ~48,40) */
+#wp-cursor svg #wp-wing-R, #wp-cursor svg #wp-wing-L { transform-origin: 48px 40px; }
+@keyframes wp-flap-R { 0%{transform:rotate(18deg)} 30%{transform:rotate(-46deg)} 60%{transform:rotate(-40deg)} 100%{transform:rotate(18deg)} }
+@keyframes wp-flap-L { 0%{transform:rotate(-18deg)} 30%{transform:rotate(46deg)} 60%{transform:rotate(40deg)} 100%{transform:rotate(-18deg)} }
+#wp-cursor svg #wp-wing-R { animation: wp-flap-R 720ms ease-in-out infinite; }
+#wp-cursor svg #wp-wing-L { animation: wp-flap-L 720ms ease-in-out infinite; }
+@keyframes wp-body-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.6px)} }
+#wp-cursor svg{ animation: wp-body-bob 720ms ease-in-out infinite; }
+
+/* Glide/Burst variants (class toggles on #wp-cursor) */
+@keyframes wp-glide-R { 0%,100%{transform:rotate(6deg)} 50%{transform:rotate(0)} }
+@keyframes wp-glide-L { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(0)} }
+@keyframes wp-burst-R { 0%{transform:rotate(22deg)} 30%{transform:rotate(-52deg)} 60%{transform:rotate(-40deg)} 100%{transform:rotate(22deg)} }
+@keyframes wp-burst-L { 0%{transform:rotate(-22deg)} 30%{transform:rotate(52deg)} 60%{transform:rotate(40deg)} 100%{transform:rotate(-22deg)} }
+@keyframes wp-body-glide { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.4px)} }
+@keyframes wp-body-burst { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.2px)} }
+#wp-cursor.cursor--glide svg #wp-wing-R { animation: wp-glide-R 1600ms ease-in-out infinite !important; }
+#wp-cursor.cursor--glide svg #wp-wing-L { animation: wp-glide-L 1600ms ease-in-out infinite !important; }
+#wp-cursor.cursor--glide svg            { animation: wp-body-glide 1600ms ease-in-out infinite !important; }
+#wp-cursor.cursor--burst svg #wp-wing-R { animation: wp-burst-R 700ms ease-in-out infinite !important; }
+#wp-cursor.cursor--burst svg #wp-wing-L { animation: wp-burst-L 700ms ease-in-out infinite !important; }
+#wp-cursor.cursor--burst svg            { animation: wp-body-burst 700ms ease-in-out infinite !important; }
+
+/* Page-leave micro transition (click swoop) */
+body.leaving .bubble.nest { opacity:.12; transition: opacity .35s ease, transform .35s ease; }
+body.leaving .bubble.nest._clicked { opacity:1; transform: scale(1.05); }
+
+/* ===== Responsive & Motion ===== */
+@media (max-width:640px){
+  .stage{ width:100vw; height:100vh; }
+  .bubble{ --nest-size: clamp(110px, 40vw, 180px); }
+  .bubble.artist{ top:10%; }
+  .bubble.punter{ bottom:10%; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  #wp-cursor svg, #wp-cursor svg #wp-wing-R, #wp-cursor svg #wp-wing-L { animation:none; }
+  .bubble{ transition:none; }
+}
