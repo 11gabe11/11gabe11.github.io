@@ -9,17 +9,56 @@
 </head>
 <body>
 
-  <!-- Full-screen playground with 4 portal bubbles -->
+  <!-- Portal stage — NESTS EDITION -->
   <div class="frame">
-    <div class="stage" id="stage" aria-label="Portal selection">
-      <a class="bubble artist" href="artist.html"><span>Artist</span></a>
-      <a class="bubble agent"  href="agent.html"><span>Agent</span></a>
-      <a class="bubble venue"  href="venue.html"><span>Venue</span></a>
-      <a class="bubble punter" href="punter.html"><span>Punter</span></a>
-    </div>
+    <main class="stage" id="stage" aria-label="Choose a portal">
+      <!-- Artist Nest -->
+      <a class="bubble nest artist eggs-2" href="artist.html" aria-label="Enter Artist portal">
+        <span>Artist</span>
+        <span class="egg" aria-hidden="true"></span>
+        <span class="egg" aria-hidden="true"></span>
+        <span class="egg" aria-hidden="true"></span>
+      </a>
+
+      <!-- Agent Nest -->
+      <a class="bubble nest agent eggs-1" href="agent.html" aria-label="Enter Agent portal">
+        <span>Agent</span>
+        <span class="egg" aria-hidden="true"></span>
+        <span class="egg" aria-hidden="true"></span>
+        <span class="egg" aria-hidden="true"></span>
+      </a>
+
+      <!-- Venue Nest -->
+      <a class="bubble nest venue eggs-3" href="venue.html" aria-label="Enter Venue portal">
+        <span>Venue</span>
+        <span class="egg" aria-hidden="true"></span>
+        <span class="egg" aria-hidden="true"></span>
+        <span class="egg" aria-hidden="true"></span>
+      </a>
+
+      <!-- Punter Nest -->
+      <a class="bubble nest punter eggs-0" href="punter.html" aria-label="Enter Punter portal">
+        <span>Punter</span>
+        <span class="egg" aria-hidden="true"></span>
+        <span class="egg" aria-hidden="true"></span>
+        <span class="egg" aria-hidden="true"></span>
+      </a>
+    </main>
   </div>
 
-  <!-- Tiny footer (optional) -->
+  <!-- No-JS fallback -->
+  <noscript>
+    <nav aria-label="Basic navigation">
+      <ul>
+        <li><a href="artist.html">Artist</a></li>
+        <li><a href="agent.html">Agent</a></li>
+        <li><a href="venue.html">Venue</a></li>
+        <li><a href="punter.html">Punter</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <!-- Tiny footer -->
   <footer class="corner-note">
     <a href="mailto:contact@thedriftingpigeon.com">contact@thedriftingpigeon.com</a>
   </footer>
