@@ -68,40 +68,67 @@ thead th{ background:#0f1836; }
 a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
 ::selection{ background:rgba(156,226,255,.28); color:#001; }
 
-/* ===== Nests (replace bubbles)
-   Keep `.bubble` for JS positioning; `.nest` controls visuals.
-   Shape: tilted ellipse (isometric bowl) + genuine twig rim layers. */
-.bubble{
+/* Nests base: ensure children cannot draw outside the bowl silhouette */
+.bubble {
   position:absolute; z-index:5; pointer-events:auto;
   width:var(--nest-size); height:calc(var(--nest-size) * 0.66);
   border-radius:50% / 42% 42% 58% 58%;
   text-decoration:none; color:var(--fg-0);
   display:block; outline:none; border:0;
-  background: radial-gradient(120% 50% at 50% 98%, rgba(0,0,0,.38), transparent 60%) no-repeat; /* ground shadow */
+  overflow: hidden; /* ⬅️ clip twigs & eggs inside the bowl */
+  background: radial-gradient(120% 50% at 50% 98%, rgba(0,0,0,.38), transparent 60%) no-repeat;
 }
 
-/* Bowl tilt + depth */
+/* Bowl tilt + depth + crisp perimeter */
 .bubble.nest{
   transform: perspective(900px) rotateX(30deg);
   transform-origin: 50% 62%;
   filter: drop-shadow(0 12px 28px rgba(0,0,0,.55));
+  border: 1px solid rgba(22,16,12,.85);   /* ⬅️ crisp edge for visual contact */
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06), /* hairline highlight */
+    0 0 0 0 rgba(0,0,0,0); /* (reserved) */;
 }
 
-/* Painted twig mass (soft underlay) + rear fade to sell depth */
+/* Painted twig mass underlay (rim) kept above twigs with z-index */
 .bubble.nest::before{
-  content:""; position:absolute; inset:0; border-radius:inherit; z-index:0;
+  content:""; position:absolute; inset:0; border-radius:inherit; z-index:6; /* ⬅️ above .twig */
   background:
     repeating-linear-gradient(14deg,  var(--twig-1) 0 3px, var(--twig-2) 3px 6px, var(--twig-3) 6px 8px),
     repeating-linear-gradient(-12deg, var(--twig-4) 0 2px, var(--twig-2) 2px 4px, var(--twig-5) 4px 6px);
-  /* cut to a rim ring; heavier at the front */
   -webkit-mask:
     radial-gradient(92% 72% at 50% 52%, transparent 44%, black 58%),
     radial-gradient(140% 130% at 50% 82%, black 42%, transparent 78%);
           mask:
     radial-gradient(92% 72% at 50% 52%, transparent 44%, black 58%),
     radial-gradient(140% 130% at 50% 82%, black 42%, transparent 78%);
-  opacity:.9;
+  opacity:.92;
 }
+
+/* Twigs (remain under the rim; clipped by overflow:hidden on .bubble) */
+.bubble.nest .twig{
+  position:absolute; left:50%; top:62%;
+  width: var(--twig-l, 40px);
+  height: var(--twig-t, 3px);
+  transform-origin: calc(var(--twig-l, 40px) * -0.12) 50%;
+  border-radius: 12px / 12px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0)),
+    repeating-linear-gradient(90deg, var(--twig-c1,#3a2d21) 0 7px, var(--twig-c2,#2b2118) 7px 14px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 -1px 0 rgba(0,0,0,.35) inset,
+    0 2px 4px rgba(0,0,0,.45);
+  z-index:5; /* ⬅️ below ::before rim which is z-index:6 */
+  -webkit-mask:
+    radial-gradient(8px 6px at 98% 50%, black 60%, transparent 100%),
+    linear-gradient(black, black);
+          mask:
+    radial-gradient(8px 6px at 98% 50%, black 60%, transparent 100%),
+    linear-gradient(black, black);
+  animation: twig-sway 3200ms ease-in-out infinite;
+}
+
 
 /* Inner bowl (moss/lining) */
 .bubble.nest::after{
