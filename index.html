@@ -7,34 +7,20 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Fullscreen, no scroll. Centered square frame containing a 2x2 grid -->
+  <div class="frame">
+    <nav class="quadgrid" aria-label="Portal selection">
+      <a class="quad artist" href="artist.html"  aria-label="Artist portal">🎨 Artist</a>
+      <a class="quad agent"  href="agent.html"   aria-label="Agent portal">🤝 Agent</a>
+      <a class="quad booker" href="booker.html"  aria-label="Booker or Venue portal">🏟️ Booker / Venue</a>
+      <a class="quad punter" href="punter.html"  aria-label="Punter portal">🎟️ Punter</a>
+    </nav>
+  </div>
 
-  <!-- GAME SECTION: your coder friend will inject/embed the game here -->
-  <main class="container">
-    <section id="game-container" class="game-container">
-      <h1>🎵 Music Gate</h1>
-      <p>This is where the interactive game will go.</p>
-
-      <!-- You can delete this button later if not needed -->
-      <button id="start-placeholder" class="btn">Start Game</button>
-    </section>
-
-    <!-- PORTALS: hidden by default until the game unlocks -->
-    <section id="portals" class="portals hidden" aria-hidden="true">
-      <h2>Choose your portal</h2>
-      <div class="portal-grid">
-        <a class="portal" href="artist.html">🎨 Artist</a>
-        <a class="portal" href="agent.html">🤝 Agent</a>
-        <a class="portal" href="booker.html">🏟️ Booker / Venue</a>
-        <a class="portal" href="punter.html">🎟️ Punter</a>
-      </div>
-    </section>
-
-    <!-- Tiny footer -->
-    <footer class="about-strip">
-      <p>About: I’m [Your Name] — musician / builder. Contact: <a href="mailto:you@example.com">you@example.com</a></p>
-      <p>© <span id="year"></span></p>
-    </footer>
-  </main>
+  <!-- (Optional) tiny footer overlay; remove if you truly want nothing else -->
+  <footer class="corner-note">
+    <a href="mailto:you@example.com">you@example.com</a>
+  </footer>
 
   <script src="scripts.js"></script>
 </body>
