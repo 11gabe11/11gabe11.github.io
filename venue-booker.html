@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Venue Booker · The Drifting Pigeon</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="pigeon.js"></script>
+  <script type="module" src="scripts/auth.js"></script>
+  <script type="module">
+    import { requireAuthOrSendTo, gateByVerificationOrPending } from './scripts/auth.js';
+    window.addEventListener('DOMContentLoaded', async () => {
+      await requireAuthOrSendTo();
+      await gateByVerificationOrPending();
+    });
+  </script>
+</head>
+<body class="portal-body">
+  <main class="portal-content">
+    <a class="back-link" href="venue.html">← Back to Venue</a>
+    <h1>Venue Booker</h1>
+    <p class="lede">This area unlocks after your Venue Supervisor approves your request.</p>
+  </main>
+</body>
+</html>
