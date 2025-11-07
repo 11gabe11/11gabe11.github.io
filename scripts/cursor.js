@@ -1,89 +1,115 @@
-// scripts/cursor.js — inject & drive the pigeon cursor on any page
+// scripts/cursor.js — realistic homing pigeon cursor (SVG)
 const USE_CUSTOM = matchMedia('(pointer: fine)').matches;
-const VIEW_W = 120, VIEW_H = 80;   // SVG viewBox
-const BEAK_X = 112, BEAK_Y = 40;   // hotspot inside viewBox
+const VIEW_W = 150, VIEW_H = 96;     // SVG viewBox
+const BEAK_X = 138, BEAK_Y = 46;     // hotspot at beak tip
 
 const SVG = `
-  <svg viewBox="0 0 120 80" width="96" height="64" role="img" aria-label="Homing pigeon cursor">
-    <defs>
-      <linearGradient id="p-body" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#d0d4d8"/>
-        <stop offset="60%" stop-color="#b3b8be"/>
-        <stop offset="100%" stop-color="#959ba3"/>
-      </linearGradient>
-      <linearGradient id="p-wing" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#c7ccd1"/>
-        <stop offset="50%" stop-color="#aab1b8"/>
-        <stop offset="100%" stop-color="#8a929a"/>
-      </linearGradient>
-      <linearGradient id="p-neck" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%"   stop-color="#27ce80"/>
-        <stop offset="55%"  stop-color="#32a6ee"/>
-        <stop offset="100%" stop-color="#ad6bf0"/>
-      </linearGradient>
-    </defs>
+<svg viewBox="0 0 150 96" role="img" aria-label="Homing pigeon cursor">
+  <defs>
+    <!-- slate body -->
+    <linearGradient id="g-body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c9ced3"/>
+      <stop offset="55%" stop-color="#a7aeb6"/>
+      <stop offset="100%" stop-color="#8e969f"/>
+    </linearGradient>
+    <!-- darker mantle/wing -->
+    <linearGradient id="g-mantle" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b5bac0"/>
+      <stop offset="60%" stop-color="#969ea8"/>
+      <stop offset="100%" stop-color="#7e8791"/>
+    </linearGradient>
+    <!-- neck iridescence -->
+    <linearGradient id="g-neck" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#1dd086"/>
+      <stop offset="40%"  stop-color="#2aa0f0"/>
+      <stop offset="80%"  stop-color="#9d6af2"/>
+      <stop offset="100%" stop-color="#c0a7ff"/>
+    </linearGradient>
+    <!-- tail bars -->
+    <linearGradient id="g-tail" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#9aa2ab"/>
+      <stop offset="70%"  stop-color="#4e545b"/>
+      <stop offset="100%" stop-color="#2f343a"/>
+    </linearGradient>
+  </defs>
 
-    <path d="M14,52 30,47 30,57 Z" fill="url(#p-wing)" stroke="#2c3136" stroke-width="1"/>
-    <ellipse cx="50" cy="50" rx="30" ry="18" fill="url(#p-body)" stroke="#2c3136" stroke-width="1"/>
-    <path d="M66,36 C66,48 58,54 50,56 C52,48 56,45 60,40 C62,37 64,36 66,36 Z"
-          fill="url(#p-neck)" opacity=".85"/>
-    <circle cx="84" cy="40" r="10" fill="url(#p-body)" stroke="#2c3136" stroke-width="1"/>
-    <circle cx="86.6" cy="38.2" r="1.8" fill="#0b0b0b"/>
-    <circle cx="86.1" cy="37.9" r="0.6" fill="#ffffff" opacity=".9"/>
-    <polygon id="wp-beak" points="88,40 112,36 112,44" fill="#e6c35a" stroke="#8b6b1f" stroke-width=".9"/>
-    <g id="wp-wing-R">
-      <path d="M48,40 C42,28 54,24 66,28 C58,28 53,31 52,34 C51,36 50,38 48,40 Z"
-            fill="url(#p-wing)" stroke="#2c3136" stroke-width="1"/>
-      <path d="M50,36 L59,30" stroke="#67707a" stroke-width="1" opacity=".7"/>
-      <path d="M48,39 L57,33" stroke="#67707a" stroke-width="1" opacity=".6"/>
-    </g>
-    <g id="wp-wing-L">
-      <path d="M48,40 C42,52 54,56 66,52 C58,52 53,49 52,46 C51,44 50,42 48,40 Z"
-            fill="url(#p-wing)" stroke="#2c3136" stroke-width="1"/>
-      <path d="M50,44 L59,50" stroke="#67707a" stroke-width="1" opacity=".6"/>
-      <path d="M48,41 L57,47" stroke="#67707a" stroke-width="1" opacity=".5"/>
-    </g>
-    <ellipse cx="50" cy="60" rx="18" ry="5" fill="#000" opacity=".12"/>
-  </svg>
+  <!-- shadow -->
+  <ellipse cx="78" cy="78" rx="22" ry="6" fill="#000" opacity=".14"></ellipse>
+
+  <!-- tail -->
+  <g id="tail">
+    <path d="M58,64 L92,64 L102,70 L56,70 Z" fill="url(#g-tail)" stroke="#2c3136" stroke-width="1" />
+  </g>
+
+  <!-- body -->
+  <ellipse cx="58" cy="56" rx="34" ry="22" fill="url(#g-body)" stroke="#2c3136" stroke-width="1"/>
+
+  <!-- neck / breast -->
+  <path d="M70,32 C72,46 64,56 58,58 C60,50 62,46 66,40 C68,36 69,33 70,32 Z"
+        fill="url(#g-neck)" opacity=".95"></path>
+
+  <!-- head -->
+  <g id="head">
+    <circle cx="98" cy="46" r="11" fill="url(#g-body)" stroke="#2c3136" stroke-width="1"/>
+    <!-- eye: orange with pale orbital ring and highlight -->
+    <circle cx="101.4" cy="43.6" r="3.2" fill="#f28b28"></circle>
+    <circle cx="101.4" cy="43.6" r="4.5" fill="none" stroke="#f4eadc" stroke-width="1.2" opacity=".9"></circle>
+    <circle cx="100.7" cy="42.9" r="1.0" fill="#fff" opacity=".9"></circle>
+    <!-- cere (pale) + two-tone beak -->
+    <path d="M104,45 C108,44 112,44 116,45 C116,45 136,43 138,46 C136,49 116,48 112,49 C110,49 108,49 104,48 Z"
+          fill="#e8e0d6" opacity=".95"></path>
+    <path d="M114,46 L138,44 L138,48 L114,49 Z" fill="#d5c79e" stroke="#8b6b1f" stroke-width="0.9"></path>
+  </g>
+
+  <!-- near wing -->
+  <g id="wing-L">
+    <path d="M50,56 C38,70 52,76 74,72 C60,72 54,66 52,62 C51,60 50,58 50,56 Z"
+          fill="url(#g-mantle)" stroke="#2c3136" stroke-width="1"/>
+    <!-- feather hints -->
+    <path d="M52,60 L68,68" stroke="#6c7580" stroke-width="1" opacity=".6"/>
+    <path d="M50,58 L66,66" stroke="#6c7580" stroke-width="1" opacity=".5"/>
+  </g>
+
+  <!-- far wing -->
+  <g id="wing-R">
+    <path d="M50,56 C40,40 54,36 76,40 C62,40 56,44 54,48 C52,52 51,54 50,56 Z"
+          fill="url(#g-mantle)" stroke="#2c3136" stroke-width="1"/>
+    <path d="M52,50 L68,42" stroke="#6c7580" stroke-width="1" opacity=".7"/>
+    <path d="M50,54 L66,46" stroke="#6c7580" stroke-width="1" opacity=".6"/>
+  </g>
+</svg>
 `;
 
 function mountCursor() {
   if (!USE_CUSTOM) return;
-
-  // avoid duplicates
   if (document.getElementById('wp-cursor')) return;
 
   const wrap = document.createElement('div');
   wrap.id = 'wp-cursor';
-  wrap.setAttribute('aria-hidden', 'true');
+  wrap.setAttribute('aria-hidden','true');
   wrap.innerHTML = SVG;
   document.body.appendChild(wrap);
 
-  let lastX = 0, lastY = 0, rafId = null;
+  let lastX=0,lastY=0,rafId=null;
 
-  function place(x, y) {
+  function place(x,y){
     const r = wrap.getBoundingClientRect();
-    const w = r.width || 32;
-    const h = w * (VIEW_H / VIEW_W);
-    const offX = w * (BEAK_X / VIEW_W);
-    const offY = h * (BEAK_Y / VIEW_H);
-    wrap.style.transform = `translate3d(${x - offX}px, ${y - offY}px, 0)`;
+    const w = r.width || 36;
+    const h = w * (VIEW_H/VIEW_W);
+    const offX = w * (BEAK_X/VIEW_W);
+    const offY = h * (BEAK_Y/VIEW_H);
+    wrap.style.transform = `translate3d(${x-offX}px, ${y-offY}px, 0)`;
   }
 
-  function onMove(e) {
-    lastX = e.clientX; lastY = e.clientY;
-    if (!rafId) rafId = requestAnimationFrame(() => { rafId = null; place(lastX, lastY); });
+  function onMove(e){
+    lastX=e.clientX; lastY=e.clientY;
+    if(!rafId) rafId=requestAnimationFrame(()=>{ rafId=null; place(lastX,lastY); });
   }
 
-  window.addEventListener('mousemove', onMove, { passive: true });
-  window.addEventListener('mousemove', e => place(e.clientX, e.clientY), { once: true });
-  window.addEventListener('mouseleave', () => {
-    wrap.style.transform = 'translate3d(-9999px,-9999px,0)';
-  });
+  window.addEventListener('mousemove', onMove, { passive:true });
+  window.addEventListener('mousemove', e=>place(e.clientX, e.clientY), { once:true });
+  window.addEventListener('mouseleave', ()=>{ wrap.style.transform='translate3d(-9999px,-9999px,0)'; });
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', mountCursor);
-} else {
-  mountCursor();
-}
+if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', mountCursor);
+else mountCursor();
