@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sign In · The Drifting Pigeon</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="portal-body">
+
+  <main class="portal-content">
+    <a class="back-link" href="./">← Back to The Drifting Pigeon</a>
+
+    <h1>The Drifting Pigeon Login</h1>
+    <p class="lede">Sign in or create an account to continue.</p>
+
+    <section class="info-card" style="max-width:720px;">
+      <!-- Toggle buttons -->
+      <div style="display:flex; gap:10px; margin-bottom:12px;">
+        <button id="switch-login"  class="button">Sign In</button>
+        <button id="switch-signup" class="button" style="opacity:.7;">Create Account</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="login-form" autocomplete="on">
+        <label>Email <input id="login-email" type="email" required></label><br>
+        <label>Password <input id="login-pass" type="password" required></label><br>
+        <button class="button" type="submit">Sign In</button>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form id="signup-form" style="display:none;">
+        <label>Name <input id="signup-name" type="text" placeholder="Your name or artist name"></label><br>
+        <label>Email <input id="signup-email" type="email" required></label><br>
+        <label>Password <input id="signup-pass" type="password" required></label><br>
+
+        <label>Role
+          <select id="signup-role">
+            <option value="artist">Artist</option>
+            <option value="agent">Agent (requires approval)</option>
+            <option value="punter">Punter</option>
+            <option value="venue_supervisor">Venue Supervisor</option>
+            <option value="venue_booker">Venue Booker (requires supervisor approval)</option>
+          </select>
+        </label><br>
+
+        <label id="supervisor-email-wrap" style="display:none;">
+          Venue Supervisor Email
+          <input id="signup-supervisor" type="email" placeholder="supervisor@venue.com">
+        </label><br>
+
+        <button class="button" type="submit">Create Account</button>
+      </form>
+
+      <p id="auth-msg" class="lede" style="margin-top:12px;"></p>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script type="module" src="pigeon.js"></script>
+  <script type="module" src="scripts/cursor.js"></script>
+
+  <script type="module">
+    import {
+      signInWithEmail,
+      signUp,
+      routeAfterLogin,
+      sb
+    } from "./scripts/auth.js";
+
+    const $ = (q) => document.querySelector(q);
+
+    // Switcher UI
+    $("#switch-login").onclick = () => switchMode(true);
+    $("#switch-signup").onclick = () => switchMode(false);
+
+    function switchMode(isLogin) {
+      $("#login-form").style.display = isLogin ? "block" : "none";
+      $("#signup-form").style.display = isLogin ? "none" : "block";
+      $("#switch-login").style.opacity = isLogin ? "1" : ".6";
+      $("#switch-signup").style.opacity = isLogin ? ".6" : "1";
+      $("#auth-msg").textContent = "";
+    }
+
+    // Dynamic supervisor field
+    $("#signup-role").onchange = () => {
+      $("#supervisor-email-wrap").style.display =
+        $("#signup-role").value === "venue_booker" ? "block" : "none";
+    };
+
+    // LOGIN
+    $("#login-form").onsubmit = async (e) => {
+      e.preventDefault();
+      $("#auth-msg").textContent = "Signing in...";
+
+      try {
+        await signInWithEmail(
+          $("#login-email").value.trim(),
+          $("#login-pass").value
+        );
+        $("#auth-msg").textContent = "✅ Welcome back...";
+        await routeAfterLogin();
+      } catch (err) {
+        $("#auth-msg").textContent = "❌ " + err.message;
+      }
+    };
+
+    // SIGNUP
+    $("#signup-form").onsubmit = async (e) => {
+      e.preventDefault();
+      $("#auth-msg").textContent = "Creating account...";
+
+      try {
+        await signUp({
+          email: $("#signup-email").value.trim(),
+          password: $("#signup-pass").value,
+          displayName: $("#signup-name").value.trim(),
+          roleId: $("#signup-role").value,
+          supervisorEmail: $("#signup-supervisor").value.trim()
+        });
+
+        const { data: { session }} = await sb.auth.getSession();
+        if (session) {
+          await routeAfterLogin();
+        } else {
+          $("#auth-msg").textContent =
+            "✅ Account created — check your email to confirm.";
+        }
+      } catch (err) {
+        $("#auth-msg").textContent = "❌ " + err.message;
+      }
+    };
+  </script>
+</body>
+</html>
