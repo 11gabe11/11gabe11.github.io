@@ -1,4 +1,4 @@
-/* ===== The Drifting Pigeon — Nests Edition (Isometric Twig Bowls + Real Pigeon Cursor) ===== */
+/* ===== The Drifting Pigeon — Nests Edition (authentic twig bowls + homing pigeon cursor) ===== */
 * { box-sizing: border-box; }
 :root{
   /* palette */
@@ -10,9 +10,13 @@
   --ring:rgba(156,226,255,.55);
 
   /* nest sizing */
-  --nest-size: clamp(120px, 18vw, 220px);
-  --egg-w: clamp(18px, 5vw, 30px);
-  --egg-h: clamp(24px, 7vw, 38px);
+  --nest-size: clamp(140px, 22vw, 260px);
+  --egg-w: clamp(20px, 5.2vw, 32px);
+  --egg-h: clamp(26px, 7.2vw, 42px);
+
+  /* twig tones */
+  --twig-1:#3a2d21; --twig-2:#2b2118; --twig-3:#241b12; --twig-4:#453526; --twig-5:#36281d;
+  --twig-hi:#6a513a;             /* light bark streaks */
 }
 
 html,body{height:100%}
@@ -34,9 +38,9 @@ body{
   border:1px solid rgba(255,255,255,.04);
   box-shadow:inset 0 16px 40px rgba(0,0,0,.35);
 }
-.stage{ position:relative; width:min(1200px,90vw); height:min(700px,80vh); isolation:isolate; }
+.stage{ position:relative; width:min(1200px,90vw); height:min(720px,82vh); isolation:isolate; }
 
-/* ===== Portal pages (subpages) — optional shared styles ===== */
+/* ===== Portal page shared styles ===== */
 .portal-body{
   margin:0; background:var(--bg-0); color:var(--fg-0);
   font:16px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
@@ -59,182 +63,177 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
 ::selection{ background:rgba(156,226,255,.28); color:#001; }
 
 /* ===== Nests (replace bubbles) =====
-   Keep `.bubble` for JS positioning, add `.nest` for visuals. */
+   Keep `.bubble` for JS positioning; `.nest` controls visuals.
+   Shape: tilted ellipse (isometric bowl) + real twig rim layers. */
 .bubble{
   position:absolute; z-index:5; pointer-events:auto;
-  width:var(--nest-size); height:calc(var(--nest-size) * 0.68); /* ellipse footprint for side-on */
+  width:var(--nest-size); height:calc(var(--nest-size) * 0.66);
   border-radius:50% / 42% 42% 58% 58%;
   text-decoration:none; color:var(--fg-0);
   display:block; outline:none; border:0;
-  /* soft ground shadow under bowl */
-  background: radial-gradient(120% 50% at 50% 98%, rgba(0,0,0,.35), transparent 60%) no-repeat;
+  background: radial-gradient(120% 50% at 50% 98%, rgba(0,0,0,.38), transparent 60%) no-repeat; /* ground shadow */
 }
 
-/* Visual bowl + tilt */
+/* Bowl tilt + depth */
 .bubble.nest{
-  position:absolute;
-  transform: perspective(900px) rotateX(32deg);
+  transform: perspective(900px) rotateX(30deg);
   transform-origin: 50% 62%;
-  filter: drop-shadow(0 12px 26px rgba(0,0,0,.5));
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,.55));
 }
 
-/* = Rim made of many small twigs (painted texture ring; bulk of twigs are DOM .twig children) */
+/* Painted twig mass (soft underlay) + rear fade to sell depth */
 .bubble.nest::before{
-  content:""; position:absolute; inset:0; border-radius:inherit; z-index:1;
+  content:""; position:absolute; inset:0; border-radius:inherit; z-index:0;
   background:
-    repeating-linear-gradient(12deg,  #3a2d21 0 3px, #2b2118 3px 6px, #1f170f 6px 8px),
-    repeating-linear-gradient(-9deg,  #3c2e22 0 2px, #2e241a 2px 4px, #241b12 4px 6px),
-    repeating-linear-gradient(25deg,  #3b2e21 0 2px, #2a2017 2px 3px, #1f170f 3px 5px),
-    repeating-linear-gradient(-28deg, #3a2b1e 0 2px, #2a2117 2px 3px, #20160f 3px 5px),
-    radial-gradient(120% 100% at 50% 65%, rgba(0,0,0,.18), transparent 60%);
+    /* wood streaks */
+    repeating-linear-gradient(14deg,  var(--twig-1) 0 3px, var(--twig-2) 3px 6px, var(--twig-3) 6px 8px),
+    repeating-linear-gradient(-12deg, var(--twig-4) 0 2px, var(--twig-2) 2px 4px, var(--twig-5) 4px 6px);
+  /* cut to a rim ring; heavier at the front */
   -webkit-mask:
-    radial-gradient(90% 70% at 50% 52%, transparent 45%, black 58%),
-    radial-gradient(130% 120% at 50% 76%, black 40%, transparent 75%);
+    radial-gradient(92% 72% at 50% 52%, transparent 44%, black 58%),
+    radial-gradient(140% 130% at 50% 82%, black 42%, transparent 78%);
   mask:
-    radial-gradient(90% 70% at 50% 52%, transparent 45%, black 58%),
-    radial-gradient(130% 120% at 50% 76%, black 40%, transparent 75%);
-  box-shadow:
-    inset 0 -10px 18px rgba(0,0,0,.45),
-    inset 0  10px 14px rgba(255,255,255,.06);
-  opacity:.96;
+    radial-gradient(92% 72% at 50% 52%, transparent 44%, black 58%),
+    radial-gradient(140% 130% at 50% 82%, black 42%, transparent 78%);
+  opacity:.9;
 }
 
-/* = Inner mossy bowl with depth */
+/* Inner bowl (moss/lining) */
 .bubble.nest::after{
-  content:""; position:absolute; inset:10% 8% 16%; border-radius:50% / 55% 55% 45% 45%;
+  content:""; position:absolute; inset:10% 9% 18%; border-radius:50% / 56% 56% 44% 44%;
   background:
-    radial-gradient(80% 70% at 50% 20%, rgba(255,255,255,.08), transparent 35%),
-    radial-gradient(85% 80% at 50% 60%, #283627, #1d281f 55%, #0e1711 100%);
-  transform: translateZ(0);
+    radial-gradient(80% 70% at 50% 22%, rgba(255,255,255,.10), transparent 36%),
+    radial-gradient(90% 85% at 50% 58%, #2c3a2c, #1c281e 58%, #0d140f 100%);
   box-shadow:
-    inset 0 22px 36px rgba(0,0,0,.55),
-    inset 0 -18px 30px rgba(0,0,0,.6),
-    0 1px 0 rgba(255,255,255,.05);
-  z-index:0;
+    inset 0 22px 34px rgba(0,0,0,.55),
+    inset 0 -16px 28px rgba(0,0,0,.62),
+    0 1px 0 rgba(255,255,255,.06);
 }
 
 /* Label chip (sign-in type) */
 .bubble.nest > span{
   position:absolute; top:-4%; left:50%;
   transform: translate(-50%, 0) rotateX(-28deg);
-  background: rgba(0,0,0,.45);
-  padding:.42rem .72rem;
+  background: rgba(0,0,0,.5);
+  padding:.46rem .78rem;
   border-radius:999px;
-  font-weight:700;
-  letter-spacing:.05em;
-  font-size: clamp(12px,1.8vw,14px);
-  text-transform:uppercase;
-  white-space:nowrap;
+  font-weight:800;
+  letter-spacing:.06em;
+  font-size: clamp(12px,1.7vw,14px);
+  text-transform:uppercase; white-space:nowrap;
   color:var(--fg-0);
-  box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
-  z-index:3;
+  box-shadow:0 3px 10px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12);
+  z-index:4;
 }
 
-/* Eggs — sit inside bowl; counter-tilted to face viewer */
+/* Eggs */
 .bubble.nest .egg{
   position:absolute; bottom:18%;
   width: var(--egg-w); height: var(--egg-h);
-  background: radial-gradient(55% 55% at 40% 35%, #ffffff, #e8f3ff 38%, #c5d8e6 70%);
+  background:
+    radial-gradient(55% 55% at 40% 35%, #ffffff, #eef6ff 42%, #c9d8e4 74%);
   border-radius:50% 50% 47% 47% / 60% 60% 40% 40%;
   box-shadow: inset 0 -6px 10px rgba(0,0,0,.18), 0 6px 10px rgba(0,0,0,.35);
   transform-origin:center bottom;
   transform: rotateX(-28deg);
-  z-index:1;
+  z-index:2;
 }
-/* staggered placement */
-.bubble.nest .egg:nth-of-type(1){ left:28%; transform:rotateX(-28deg) rotate(-6deg); }
-.bubble.nest .egg:nth-of-type(2){ left:50%; transform:translateX(-50%) rotateX(-28deg) rotate(2deg); z-index:2; }
-.bubble.nest .egg:nth-of-type(3){ right:28%; transform:rotateX(-28deg) rotate(6deg); }
-
-/* egg count helpers */
+.bubble.nest .egg:nth-of-type(1){ left:26%; transform:rotateX(-28deg) rotate(-6deg); }
+.bubble.nest .egg:nth-of-type(2){ left:50%; transform:translateX(-50%) rotateX(-28deg) rotate(2deg); z-index:3; }
+.bubble.nest .egg:nth-of-type(3){ right:26%; transform:rotateX(-28deg) rotate(6deg); }
 .bubble.nest.eggs-0 .egg{ display:none; }
 .bubble.nest.eggs-1 .egg:nth-of-type(n+2){ display:none; }
 .bubble.nest.eggs-2 .egg:nth-of-type(n+3){ display:none; }
 
-/* Procedural twig elements (added by JS) */
+/* ===== Procedural twig elements (DOM children) ===== */
 .bubble.nest .twig{
-  position:absolute; left:50%; top:60%;
-  width: var(--twig-l, 32px);
+  position:absolute; left:50%; top:62%;
+  width: var(--twig-l, 40px);
   height: var(--twig-t, 3px);
-  transform-origin: calc(var(--twig-l, 32px) * -0.1) 50%;
-  border-radius:8px;
+  transform-origin: calc(var(--twig-l, 40px) * -0.12) 50%;
+  border-radius: 12px / 12px;
+  /* bark texture */
   background:
-    linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,0)),
-    linear-gradient(90deg, var(--twig-c1, #3a2d21), var(--twig-c2, #2b2118));
-  box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 -1px 0 rgba(0,0,0,.25) inset, 0 2px 4px rgba(0,0,0,.35);
-  z-index:2; opacity:.98;
-  animation: dp-twig-sway 3000ms ease-in-out infinite;
+    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0)),
+    repeating-linear-gradient(90deg, var(--twig-c1,#3a2d21) 0 7px, var(--twig-c2,#2b2118) 7px 14px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 -1px 0 rgba(0,0,0,.35) inset,
+    0 2px 4px rgba(0,0,0,.45);
+  z-index:3; opacity:.98;
+  /* subtle leaf/knots at tips using mask to roughen ends */
+  -webkit-mask:
+    radial-gradient(8px 6px at 98% 50%, black 60%, transparent 100%),
+    linear-gradient(black, black);
+          mask:
+    radial-gradient(8px 6px at 98% 50%, black 60%, transparent 100%),
+    linear-gradient(black, black);
+  animation: twig-sway 3200ms ease-in-out infinite;
 }
-@keyframes dp-twig-sway { 0%,100% { transform: var(--twig-tf) rotate(0.6deg); } 50% { transform: var(--twig-tf) rotate(-0.6deg); } }
-.bubble.nest:hover .twig{ animation-duration:2600ms; opacity:1; }
+@keyframes twig-sway { 0%,100%{ transform: var(--twig-tf) rotate(0.8deg) } 50%{ transform: var(--twig-tf) rotate(-0.8deg) } }
+.bubble.nest .twig.top   { z-index:5; filter: drop-shadow(0 1px 3px rgba(0,0,0,.45)); }
+.bubble.nest .twig.mid   { z-index:4; opacity:.95; }
+.bubble.nest .twig.back  { z-index:1; opacity:.85; }
+.bubble.nest:hover .twig{ animation-duration:2600ms }
 
 /* Focus/hover */
-.bubble.nest:hover{ filter: drop-shadow(0 16px 34px rgba(0,0,0,.65)); }
+.bubble.nest:hover{ filter: drop-shadow(0 16px 36px rgba(0,0,0,.68)); }
 .bubble.nest:focus-visible{ outline:none; box-shadow: 0 0 0 6px var(--ring); }
 
-/* Original diamond placement retained (JS animates absolute left/top) */
+/* Initial diamond placement; JS then animates absolute left/top */
 .bubble.artist{ left:50%; top:8%; transform:translate(-50%,0); }
-.bubble.agent { left:5%; top:50%; transform:translate(0,-50%); }
-.bubble.venue { right:5%; top:50%; transform:translate(0,-50%); }
+.bubble.agent { left:6%; top:50%; transform:translate(0,-50%); }
+.bubble.venue { right:6%; top:50%; transform:translate(0,-50%); }
 .bubble.punter{ left:50%; bottom:6%; transform:translate(-50%,0); }
 
-/* ===== Footer ===== */
+/* Footer */
 .corner-note{
   position:fixed; right:14px; bottom:10px; font-size:.9rem; opacity:.8; z-index:10;
 }
 .corner-note a{ color:var(--accent); text-decoration:none; border-bottom:1px dashed transparent; }
 .corner-note a:hover{ border-bottom-color:var(--accent); }
 
-/* Ambient SVG layer used by pigeon.js */
+/* Ambient SVG */
 #sky, #sparks{
   position:fixed; inset:0; z-index:0; pointer-events:none;
   filter: drop-shadow(0 0 6px rgba(156,226,255,.25));
 }
 
-/* ===== Custom cursor — Realistic Homing Pigeon (desktop only) ===== */
+/* ===== Custom cursor — Real Homing Pigeon (desktop only) ===== */
 @media (pointer: fine) { html, body, *, a, button, .bubble { cursor: none !important; } }
 #wp-cursor{
   position:fixed; left:0; top:0; z-index:9999; pointer-events:none;
-  width:clamp(28px,3.8vmin,44px); height:auto;
+  width:clamp(30px,4.2vmin,48px); height:auto;
   transform:translate3d(-9999px,-9999px,0);
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,.06)) drop-shadow(0 10px 20px rgba(0,0,0,.35));
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.06)) drop-shadow(0 10px 22px rgba(0,0,0,.38));
 }
-/* Wing rigs (140x90 viewBox shoulder ~60,42) */
-#wp-cursor svg #wing-R, #wp-cursor svg #wing-L { transform-origin: 60px 42px; }
-@keyframes dp-flap-R { 0%{transform:rotate(16deg)} 30%{transform:rotate(-44deg)} 60%{transform:rotate(-36deg)} 100%{transform:rotate(16deg)} }
-@keyframes dp-flap-L { 0%{transform:rotate(-16deg)} 30%{transform:rotate(44deg)} 60%{transform:rotate(36deg)} 100%{transform:rotate(-16deg)} }
-@keyframes dp-body   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.7px)} }
+/* Wing rigs (150x96 viewBox shoulder ~64,44) */
+#wp-cursor svg #wing-R, #wp-cursor svg #wing-L { transform-origin: 64px 44px; }
+@keyframes dp-flap-R { 0%{transform:rotate(18deg)} 30%{transform:rotate(-46deg)} 60%{transform:rotate(-38deg)} 100%{transform:rotate(18deg)} }
+@keyframes dp-flap-L { 0%{transform:rotate(-18deg)} 30%{transform:rotate(46deg)} 60%{transform:rotate(38deg)} 100%{transform:rotate(-18deg)} }
+@keyframes dp-body   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.8px)} }
 #wp-cursor svg #wing-R { animation: dp-flap-R 720ms ease-in-out infinite; }
 #wp-cursor svg #wing-L { animation: dp-flap-L 720ms ease-in-out infinite; }
 #wp-cursor svg         { animation: dp-body   720ms ease-in-out infinite; }
 
-/* Glide/Burst variants (class toggles on #wp-cursor) */
+/* Glide / Burst */
 @keyframes dp-glide-R { 0%,100%{transform:rotate(6deg)} 50%{transform:rotate(0)} }
 @keyframes dp-glide-L { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(0)} }
 @keyframes dp-body-glide { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.4px)} }
 #wp-cursor.cursor--glide svg #wing-R { animation: dp-glide-R 1600ms ease-in-out infinite !important; }
 #wp-cursor.cursor--glide svg #wing-L { animation: dp-glide-L 1600ms ease-in-out infinite !important; }
 #wp-cursor.cursor--glide svg         { animation: dp-body-glide 1600ms ease-in-out infinite !important; }
-
-@keyframes dp-burst-R { 0%{transform:rotate(22deg)} 30%{transform:rotate(-52deg)} 60%{transform:rotate(-40deg)} 100%{transform:rotate(22deg)} }
-@keyframes dp-burst-L { 0%{transform:rotate(-22deg)} 30%{transform:rotate(52deg)} 60%{transform:rotate(40deg)} 100%{transform:rotate(-22deg)} }
-@keyframes dp-body-burst { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.1px)} }
+@keyframes dp-burst-R { 0%{transform:rotate(24deg)} 30%{transform:rotate(-54deg)} 60%{transform:rotate(-42deg)} 100%{transform:rotate(24deg)} }
+@keyframes dp-burst-L { 0%{transform:rotate(-24deg)} 30%{transform:rotate(54deg)} 60%{transform:rotate(42deg)} 100%{transform:rotate(-24deg)} }
+@keyframes dp-body-burst { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.2px)} }
 #wp-cursor.cursor--burst svg #wing-R { animation: dp-burst-R 700ms ease-in-out infinite !important; }
 #wp-cursor.cursor--burst svg #wing-L { animation: dp-burst-L 700ms ease-in-out infinite !important; }
 #wp-cursor.cursor--burst svg         { animation: dp-body-burst 700ms ease-in-out infinite !important; }
 
-/* Page-leave micro transition (click swoop) */
-body.leaving .bubble.nest { opacity:.12; transition: opacity .35s ease, transform .35s ease; }
-body.leaving .bubble.nest._clicked { opacity:1; transform: scale(1.05); }
-
-/* ===== Responsive & Motion ===== */
+/* Motion prefs */
 @media (max-width:640px){
   .stage{ width:100vw; height:100vh; }
-  .bubble{ --nest-size: clamp(110px, 40vw, 180px); }
-  .bubble.artist{ top:10%; }
-  .bubble.punter{ bottom:10%; }
 }
-
 @media (prefers-reduced-motion: reduce){
   #wp-cursor svg, #wp-cursor svg #wing-R, #wp-cursor svg #wing-L { animation:none !important; }
   .bubble{ transition:none; }
