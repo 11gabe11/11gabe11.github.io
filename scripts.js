@@ -1,16 +1,16 @@
-// scripts.js — The Wandering Pigeon
+// scripts.js — The Drifting Pigeon (Nests Edition)
 document.addEventListener("DOMContentLoaded", () => {
   /* ================================
    *  Custom cursor (desktop only)
-   *  - SVG viewBox is 96x64
-   *  - Beak tip hotspot ≈ (90, 26)
+   *  - SVG viewBox is 120x80
+   *  - Beak tip hotspot ≈ (112, 40)
    * ================================ */
   const useCustomCursor = window.matchMedia("(pointer: fine)").matches;
   const cursorEl = document.getElementById("wp-cursor");
 
   if (useCustomCursor && cursorEl) {
-const VIEW_W = 120, VIEW_H = 80;  // new SVG viewBox
-const BEAK_X = 112, BEAK_Y = 40;  // beak-tip hotspot
+    const VIEW_W = 120, VIEW_H = 80;   // SVG viewBox
+    const BEAK_X = 112, BEAK_Y = 40;   // beak-tip hotspot
     let lastX = 0, lastY = 0, rafId = null;
 
     function place(x, y) {
@@ -33,58 +33,71 @@ const BEAK_X = 112, BEAK_Y = 40;  // beak-tip hotspot
   }
 
   /* ======================================
-   *  Floating, colliding portal bubbles
-   *  - Clickable <a.bubble> links
-   *  - Perfect circles (size from CSS)
+   *  Floating, colliding portal NESTS
+   *  - Clickable <a.bubble.nest> links
+   *  - Circle-like bodies (size from CSS)
+   *  - Gentle bobbing; optional egg wobble
    * ====================================== */
   const stage = document.getElementById("stage");
   if (!stage) return;
 
-  // ensure bubbles are clickable and positioned absolutely
-  const bubbles = Array.from(stage.querySelectorAll(".bubble"));
-  bubbles.forEach(b => {
-    b.style.position = "absolute";
-    b.style.willChange = "left, top";
-    b.style.pointerEvents = "auto";
+  // Prefer nests; fall back to any .bubble if legacy markup is present
+  let nests = Array.from(stage.querySelectorAll(".bubble.nest"));
+  if (nests.length === 0) nests = Array.from(stage.querySelectorAll(".nest, .bubble"));
+
+  // Ensure they’re absolutely positioned + clickable
+  nests.forEach(n => {
+    n.style.position = "absolute";
+    n.style.willChange = "left, top, transform";
+    n.style.pointerEvents = "auto";
   });
 
-  // speed controls (px per millisecond)
+  // Motion tuning (nests feel a bit heavier than bubbles)
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const SPEED_MIN = prefersReducedMotion ? 0.012 : 0.016; // gentle drift
-  const SPEED_MAX = prefersReducedMotion ? 0.018 : 0.022;
+  const SPEED_MIN = prefersReducedMotion ? 0.010 : 0.013; // px per ms
+  const SPEED_MAX = prefersReducedMotion ? 0.015 : 0.018;
+  const BOB_SPEED_MIN = 0.0008, BOB_SPEED_MAX = 0.0016;   // radians per ms
+  const BOB_AMP_MIN = 3, BOB_AMP_MAX = 9;                 // px
 
+  function randBetween(a, b) { return a + Math.random() * (b - a); }
   function randSpeed() {
-    const v = Math.random() * (SPEED_MAX - SPEED_MIN) + SPEED_MIN;
+    const v = randBetween(SPEED_MIN, SPEED_MAX);
     return (Math.random() < 0.5 ? -v : v);
   }
 
-  // state
-  const nodes = bubbles.map(el => ({
-    el,
-    x: 0, y: 0,
-    vx: randSpeed(),
-    vy: randSpeed(),
-    r:  0 // computed from actual rendered size
-  }));
+  // Each node: physics + bobbing + eggs
+  const nodes = nests.map(el => {
+    const eggs = Array.from(el.querySelectorAll(".egg"));
+    return {
+      el,
+      eggs,
+      x: 0, y: 0,
+      vx: randSpeed(),
+      vy: randSpeed(),
+      r: 0,                    // computed from DOM
+      bobPhase: Math.random() * Math.PI * 2,
+      bobSpeed: randBetween(BOB_SPEED_MIN, BOB_SPEED_MAX) * (Math.random() < 0.5 ? -1 : 1),
+      bobAmp: randBetween(BOB_AMP_MIN, BOB_AMP_MAX),
+      hoverMul: 1              // slows when hovered/focused
+    };
+  });
 
   let W = stage.clientWidth;
   let H = stage.clientHeight;
 
-  // measure radius from real DOM size (keeps circles perfect across devices)
   function measureRadii() {
     nodes.forEach(n => {
       const rect = n.el.getBoundingClientRect();
-      n.r = rect.width / 2; // aspect-ratio:1/1 in CSS ensures width==height
+      n.r = rect.width / 2; // assume roughly circular footprint from CSS --size
     });
   }
 
   function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
 
-  // initial layout (seed in a 2x2 grid, then clamp inside)
+  // Initial layout: seed a 2x2 grid near centers, then clamp inside
   function initializeLayout() {
     W = stage.clientWidth;
     H = stage.clientHeight;
-
     measureRadii();
 
     const cols = 2, rows = 2;
@@ -95,21 +108,18 @@ const BEAK_X = 112, BEAK_Y = 40;  // beak-tip hotspot
       const r = Math.floor(i / cols);
       const cellW = W / cols, cellH = H / rows;
 
-      // seed near cell centers with a tiny random nudge
-      n.x = (c + 0.5) * cellW + (Math.random() * 20 - 10);
-      n.y = (r + 0.5) * cellH + (Math.random() * 20 - 10);
+      n.x = (c + 0.5) * cellW + (Math.random() * 24 - 12);
+      n.y = (r + 0.5) * cellH + (Math.random() * 24 - 12);
 
-      // clamp inside walls
       n.x = clamp(n.x, n.r + pad, W - n.r - pad);
       n.y = clamp(n.y, n.r + pad, H - n.r - pad);
 
-      // write initial position
       n.el.style.left = (n.x - n.r) + "px";
       n.el.style.top  = (n.y - n.r) + "px";
     });
   }
 
-  // elastic collision (equal mass)
+  // Elastic collision (equal mass circles)
   function resolveCollision(a, b) {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
@@ -117,24 +127,23 @@ const BEAK_X = 112, BEAK_Y = 40;  // beak-tip hotspot
     const overlap = a.r + b.r - dist;
     if (overlap <= 0) return;
 
-    // push apart
     const nx = dx / dist, ny = dy / dist;
-    const sep = overlap / 2 + 0.5;
+    const sep = overlap / 2 + 0.5; // bias to prevent sticking
     a.x -= nx * sep; a.y -= ny * sep;
     b.x += nx * sep; b.y += ny * sep;
 
-    // reflect velocities along the normal if approaching
+    // Reflect velocity along normal when approaching
     const rvx = b.vx - a.vx;
     const rvy = b.vy - a.vy;
     const rel = rvx * nx + rvy * ny;
     if (rel < 0) {
-      const j = -rel; // perfectly elastic, equal mass
+      const j = -rel;
       a.vx -= nx * j; a.vy -= ny * j;
       b.vx += nx * j; b.vy += ny * j;
     }
   }
 
-  // wall containment
+  // Containment within stage
   function contain(n) {
     if (n.x - n.r <= 0)   { n.x = n.r;       n.vx = Math.abs(n.vx); }
     if (n.x + n.r >= W)   { n.x = W - n.r;   n.vx = -Math.abs(n.vx); }
@@ -142,43 +151,90 @@ const BEAK_X = 112, BEAK_Y = 40;  // beak-tip hotspot
     if (n.y + n.r >= H)   { n.y = H - n.r;   n.vy = -Math.abs(n.vy); }
   }
 
-  function draw() {
+  // Hover/focus damping (nests “settle” a little)
+  function attachInteractivity() {
     nodes.forEach(n => {
-      n.el.style.left = (n.x - n.r) + "px";
-      n.el.style.top  = (n.y - n.r) + "px";
+      n.el.addEventListener("pointerenter", () => { n.hoverMul = 0.6; }, { passive: true });
+      n.el.addEventListener("pointerleave", () => { n.hoverMul = 1.0; }, { passive: true });
+      n.el.addEventListener("focus", () => { n.hoverMul = 0.6; });
+      n.el.addEventListener("blur",  () => { n.hoverMul = 1.0; });
     });
   }
 
-  // main loop
+  function draw(now) {
+    nodes.forEach(n => {
+      // Position body
+      n.el.style.left = (n.x - n.r) + "px";
+      n.el.style.top  = (n.y - n.r) + "px";
+
+      // Bobbing (translateY) — turned down for reduced motion
+      if (!prefersReducedMotion) {
+        const bob = Math.sin(n.bobPhase) * n.bobAmp;
+        n.el.style.transform = `translate3d(0, ${bob.toFixed(2)}px, 0)`;
+      } else {
+        n.el.style.transform = "";
+      }
+
+      // Optional egg wobble (subtle)
+      if (!prefersReducedMotion && n.eggs.length) {
+        n.eggs.forEach((egg, i) => {
+          const wob = Math.sin(n.bobPhase * (1.1 + i * 0.07) + i) * 1.6; // degrees
+          egg.style.transform += ` rotate(${wob.toFixed(2)}deg)`;
+        });
+      }
+    });
+  }
+
+  // Main loop
   let last = performance.now();
   function tick(now) {
-    const dt = Math.min(32, now - last); // clamp delta for stability
+    const dt = Math.min(32, now - last); // ms
     last = now;
 
     nodes.forEach(n => {
-      n.x += n.vx * dt;
-      n.y += n.vy * dt;
+      // Base drift
+      n.x += n.vx * dt * n.hoverMul;
+      n.y += n.vy * dt * n.hoverMul;
+
+      // Bounds
       contain(n);
+
+      // Bob phase advance
+      n.bobPhase += n.bobSpeed * dt;
     });
 
+    // Pairwise collisions
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         resolveCollision(nodes[i], nodes[j]);
       }
     }
 
-    draw();
-    requestAnimationFrame(tick);
+    draw(now);
+    rafId = requestAnimationFrame(tick);
   }
 
-  // re-measure on resize/orientation change
-  const ro = new ResizeObserver(() => {
-    initializeLayout();
-  });
+  // Resize observer re-initializes on container change
+  const ro = new ResizeObserver(() => initializeLayout());
   ro.observe(stage);
 
-  initializeLayout();
-  requestAnimationFrame(tick);
+  // Visibility / motion preferences
+  let rafId = null;
+  function start() { if (!rafId) { last = performance.now(); rafId = requestAnimationFrame(tick); } }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
 
-  console.log("✅ Bubbles + pigeon cursor ready.");
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  function applyMotionPreference(){
+    if (document.hidden || media.matches) stop();
+    else start();
+  }
+  document.addEventListener("visibilitychange", applyMotionPreference);
+  media.addEventListener?.("change", applyMotionPreference);
+
+  // Boot
+  attachInteractivity();
+  initializeLayout();
+  start();
+
+  console.log("✅ Nests + pigeon cursor ready.");
 });
