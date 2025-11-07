@@ -1,5 +1,10 @@
 // scripts.js — floating, colliding portal bubbles (no unlock)
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ make sure all bubbles are always clickable (safety override)
+document.querySelectorAll('.bubble').forEach(b => {
+  b.style.pointerEvents = "auto";
+});
+
   const stage = document.getElementById("stage");
   if (!stage) return;
 
