@@ -356,3 +356,99 @@ a:hover{ color:#ffe09a; }
 @media (max-width: 420px){
   .bubble{ --d: calc(var(--bubble-size) - 2%); }
 }
+
+/* === CRISP CIRCLES, SMALLER SIZE, NO OUTSIDE HALOS === */
+
+/* size with vmin so diameter tracks the shorter screen side (stays circular) */
+:root{
+  --bubble-vmin: 16vmin;     /* overall size (try 14vmin if you want even smaller) */
+  --film-intensity: 0.14;    /* dialed back a touch for crispness */
+  --rim-intensity: 0.38;     /* slightly softer rim */
+  --sheen-speed: 26s;        /* slower sweep */
+}
+
+/* force perfect circle with aspect-ratio; use vmin for size */
+.bubble{
+  width: var(--bubble-vmin);
+  height: auto;
+  aspect-ratio: 1 / 1;             /* <-- always a circle */
+  border-radius: 50%;
+  overflow: hidden;                 /* clip inner highlights to the bubble edge */
+  /* tighter, cleaner base */
+  background:
+    radial-gradient(130% 130% at 35% 25%, rgba(255,255,255,.10), transparent 45%),
+    radial-gradient(85% 90% at 55% 70%, rgba(0,0,0,.32), transparent 60%),
+    linear-gradient(180deg, #1b1b1b, #0e0e0e);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 14px 36px rgba(0,0,0,.42),
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 -10px 22px rgba(230,195,90,.05) inset;
+}
+
+/* keep label sharp */
+.bubble span{
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,.45),
+    0 0 12px rgba(230,195,90,.14);
+}
+
+/* sheen/film fully inside the bubble: reduce inset + blur so edges stay crispy */
+.bubble::before{
+  content:"";
+  position:absolute;
+  inset:-6%;                     /* was larger; keep it close to the edge */
+  border-radius:50%;
+  pointer-events:none;
+  mix-blend-mode:screen;
+  filter: blur(12px);            /* smaller blur = crisper edge */
+  animation: bubble-film-spin var(--sheen-speed) linear infinite;
+  background:
+    conic-gradient(from 0deg,
+      rgba(255,180,80,  calc(var(--film-intensity) * .95)) 0deg,
+      rgba(80,200,255,  calc(var(--film-intensity) * .85)) 50deg,
+      rgba(255,95,210,  calc(var(--film-intensity) * .85)) 110deg,
+      rgba(90,255,200,  calc(var(--film-intensity) * .75)) 170deg,
+      rgba(255,230,120, calc(var(--film-intensity) * .85)) 220deg,
+      rgba(180,130,255, calc(var(--film-intensity) * .75)) 280deg,
+      transparent 320deg),
+    radial-gradient(115% 115% at 28% 22%, rgba(255,255,255,.16), transparent 42%),
+    radial-gradient(115% 115% at 70% 78%, rgba(255,255,255,.08), transparent 50%);
+}
+@keyframes bubble-film-spin { to { transform: rotate(360deg); } }
+
+/* rim light masked to the very edge; smaller blur to avoid glow “halo” outside */
+.bubble::after{
+  content:"";
+  position:absolute;
+  inset:0;                       /* sit exactly on the edge */
+  border-radius:50%;
+  pointer-events:none;
+  -webkit-mask: radial-gradient(closest-side, transparent 63%, black 70%);
+          mask: radial-gradient(closest-side, transparent 63%, black 70%);
+  background:
+    conic-gradient(from 100deg,
+      rgba(255,255,255,.22),
+      rgba(255,255,255,0) 20%,
+      rgba(230,195,90, var(--rim-intensity)) 35%,
+      rgba(255,255,255,.18) 55%,
+      rgba(180,120,40, calc(var(--rim-intensity) * .65)) 75%,
+      rgba(255,255,255,.10) 90%,
+      transparent 100%);
+  mix-blend-mode: screen;
+  filter: blur(4px);             /* smaller = crisper rim */
+}
+
+/* hover/focus: tiny brightening without increasing halo */
+.bubble:hover::before,
+.bubble:focus-visible::before { filter: blur(11px) brightness(1.06); }
+.bubble:hover::after,
+.bubble:focus-visible::after  { filter: blur(4px) brightness(1.08); }
+
+/* small phones: slightly smaller */
+@media (max-width: 420px){
+  :root{ --bubble-vmin: 14vmin; }
+}
