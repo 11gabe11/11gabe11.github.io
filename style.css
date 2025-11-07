@@ -218,6 +218,12 @@ a{ color:var(--accent); } a:hover{ color:#c6f1ff; }
     drop-shadow(0 2px 1px rgba(255,255,255,.06))
     drop-shadow(0 12px 22px rgba(0,0,0,.45));
 }
+#wp-cursor svg {
+  transform-origin: 50% 50%;
+}
+#wp-cursor.cursor--burst svg {
+  transform: scale(1.08); /* slightly larger when burst */
+}
 
 /* Wing rigs (150x96 viewBox shoulder ~64,44) */
 #wp-cursor svg #wing-R, #wp-cursor svg #wing-L { transform-origin: 64px 44px; }
