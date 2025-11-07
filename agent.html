@@ -22,5 +22,87 @@
     </section>
   </main>
 </body>
+  <!-- Custom cursor: The Wandering Pigeon (desktop only) -->
+<div id="wp-cursor" aria-hidden="true">
+  <!-- Realistic homing pigeon, tiny & transparent background.
+       ViewBox = 96x64. Beak TIP is at ~ (90, 26). -->
+  <svg viewBox="0 0 96 64" width="96" height="64" role="img">
+    <defs>
+      <!-- Soft grey body with subtle shading -->
+      <linearGradient id="pigeonBody" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"  stop-color="#d3d5d7"/>
+        <stop offset="60%" stop-color="#b9bdc1"/>
+        <stop offset="100%" stop-color="#9ea4aa"/>
+      </linearGradient>
+      <!-- Wing gradient -->
+      <linearGradient id="pigeonWing" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"   stop-color="#c8ccd0"/>
+        <stop offset="50%"  stop-color="#aeb4ba"/>
+        <stop offset="100%" stop-color="#8d949b"/>
+      </linearGradient>
+      <!-- Neck iridescence (green→violet) -->
+      <linearGradient id="pigeonNeck" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"   stop-color="#2bd58a"/>
+        <stop offset="55%"  stop-color="#32b0ef"/>
+        <stop offset="100%" stop-color="#b36bf2"/>
+      </linearGradient>
+      <!-- Feather lines -->
+      <linearGradient id="pigeonFeatherLine" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#6d737a" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="#555b62" stop-opacity=".7"/>
+      </linearGradient>
+      <!-- Subtle outline color -->
+      <linearGradient id="pigeonOutline" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#34383c"/>
+        <stop offset="100%" stop-color="#1e2226"/>
+      </linearGradient>
+    </defs>
+
+    <!-- TAIL -->
+    <path d="M12,38 L26,34 L26,42 Z"
+          fill="url(#pigeonWing)" stroke="url(#pigeonOutline)" stroke-width="1" />
+
+    <!-- BODY -->
+    <ellipse cx="42" cy="36" rx="26" ry="16"
+             fill="url(#pigeonBody)" stroke="url(#pigeonOutline)" stroke-width="1"/>
+
+    <!-- NECK (iridescent) -->
+    <path d="M56,24 C56,33 50,38 44,40 C46,33 50,30 52,26 C53,24 54,23 56,24 Z"
+          fill="url(#pigeonNeck)" opacity=".85" />
+
+    <!-- HEAD -->
+    <circle cx="68" cy="26" r="9"
+            fill="url(#pigeonBody)" stroke="url(#pigeonOutline)" stroke-width="1"/>
+
+    <!-- EYE -->
+    <circle cx="70.6" cy="24.6" r="1.6" fill="#0b0b0b"/>
+    <circle cx="70.2" cy="24.3" r="0.5" fill="#ffffff" opacity=".9"/>
+
+    <!-- BEAK (TIP ≈ 90,26) -->
+    <polygon id="wp-beak"
+             points="74,26 90,22 90,30"
+             fill="#e6c35a" stroke="#8b6b1f" stroke-width=".8"/>
+
+    <!-- WINGS (two groups so we can flap them) -->
+    <g id="wp-wing-top" transform-origin="32 28">
+      <path d="M18,30 C10,16 26,12 38,16 C30,16 22,20 22,26 C22,28 20,30 18,30 Z"
+            fill="url(#pigeonWing)" stroke="url(#pigeonOutline)" stroke-width="1"/>
+      <!-- primary feather lines -->
+      <path d="M20,28 L30,22" stroke="url(#pigeonFeatherLine)" stroke-width="1" opacity=".7"/>
+      <path d="M18,30 L29,24" stroke="url(#pigeonFeatherLine)" stroke-width="1" opacity=".6"/>
+    </g>
+
+    <g id="wp-wing-bot" transform-origin="30 40">
+      <path d="M18,42 C10,54 26,58 38,54 C30,54 22,50 22,46 C22,44 20,42 18,42 Z"
+            fill="url(#pigeonWing)" stroke="url(#pigeonOutline)" stroke-width="1"/>
+      <path d="M20,44 L30,50" stroke="url(#pigeonFeatherLine)" stroke-width="1" opacity=".6"/>
+      <path d="M18,42 L29,48" stroke="url(#pigeonFeatherLine)" stroke-width="1" opacity=".5"/>
+    </g>
+
+    <!-- Subtle underside shadow -->
+    <ellipse cx="42" cy="44" rx="16" ry="4" fill="#000" opacity=".12"/>
+  </svg>
+</div>
+
 </html>
 
