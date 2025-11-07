@@ -1,1 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Venue Approvals · The Drifting Pigeon</title>
+  <link rel="stylesheet" href="../style.css" />
+  <script type="module" src="../pigeon.js"></script>
+  <script type="module" src="../scripts/auth.js"></script>
+  <script type="module">
+    import { sb, approveRequest, requireAuthOrSendTo } from '../scripts/auth.js';
 
+    async function load() {
+      await requireAuthOrSendTo('../auth.html');
+
+      const { data: { session } } = await sb.auth.getSession();
+      const myEmail = session?.user?.email?.toLowerCase();
+
+      // ensure I'm a venue_supervisor
+      const { data: me } = await sb
+        .from('profiles')
+        .select('role_id')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      const list = document.querySelector('#list');
+
+      if (!me || me.role_id !== 'venue_supervisor') {
+        list.innerHTML = '<p>You must be a Venue Supervisor to approve bookers.</p>';
+        return;
+      }
+
+      const { data, error } = await sb
+        .from('verification_requests')
+        .select('id, requester_id, target_supervisor_email, created_at')
+        .eq('role_requested', 'venue_booker')
+        .eq('target_supervisor_email', myEmail)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) { list.textContent = 'Error: ' + error.message; return; }
+
+      if (!data?.length) { list.innerHTML = '<p>No pending venue booker requests.</p>'; return; }
+
+      list.innerHTML = data.map(r => `
+        <div class="section">
+          <div><strong>Venue booker request</strong> from <code>${r.requester_id}</code></div>
+          <div>Supervisor email: <code>${r.target_supervisor_email}</code></div>
+          <div>Requested: ${new Date(r.created_at).toLocaleString()}</div>
+          <p>
+            <button class="button" data-id="${r.id}" data-yes="1">Approve</button>
+            <button class="button" data-id="${r.id}" data-yes="0">Reject</button>
+          </p>
+        </div>
+      `).join('');
+
+      list.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-id]');
+        if (!btn) return;
+        try {
+          await approveRequest(btn.dataset.id, btn.dataset.yes === '1', null);
+          location.reload();
+        } catch (err) { alert(err.message); }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', load);
+  </script>
+</head>
+<body class="portal-body">
+  <main class="portal-content">
+    <a class="back-link" href="../venue-supervisor.html">← Back to Venue Supervisor</a>
+    <h1>Venue Booker Approvals</h1>
+    <div id="list"></div>
+  </main>
+</body>
+</html>
