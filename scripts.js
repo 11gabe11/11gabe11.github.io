@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const cursorEl = document.getElementById("wp-cursor");
 
   if (useCustomCursor && cursorEl) {
-    const VIEW_W = 96, VIEW_H = 64;
-    const BEAK_X = 90, BEAK_Y = 26; // hotspot inside viewBox
+const VIEW_W = 120, VIEW_H = 80;  // new SVG viewBox
+const BEAK_X = 112, BEAK_Y = 40;  // beak-tip hotspot
     let lastX = 0, lastY = 0, rafId = null;
 
     function place(x, y) {
