@@ -163,3 +163,44 @@ a{ color:var(--gold-1); } a:hover{ color:#ffe09a; }
   pointer-events: none;
   z-index: 9999;
 }
+
+/* ===== Pigeon GLIDE & BURST modes ===== */
+
+/* small oscillation with wings mostly open */
+@keyframes wp-glide-R { 0%,100% { transform: rotate(6deg) } 50% { transform: rotate(0deg) } }
+@keyframes wp-glide-L { 0%,100% { transform: rotate(-6deg) } 50% { transform: rotate(0deg) } }
+
+/* bigger amplitude, faster tempo (burst of flaps) */
+@keyframes wp-burst-R { 0% { transform: rotate(22deg) } 30% { transform: rotate(-52deg) } 60% { transform: rotate(-40deg) } 100% { transform: rotate(22deg) } }
+@keyframes wp-burst-L { 0% { transform: rotate(-22deg) } 30% { transform: rotate(52deg) } 60% { transform: rotate(40deg) } 100% { transform: rotate(-22deg) } }
+
+/* body bob for life */
+@keyframes wp-body-glide { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-0.4px) } }
+@keyframes wp-body-burst { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-1.2px) } }
+
+/* default: you already animate with wp-flap-R/L in your cursor section.
+   GLIDE overrides those when .cursor--glide is on #wp-cursor */
+#wp-cursor.cursor--glide svg #wp-wing-R { animation: wp-glide-R 1600ms ease-in-out infinite !important; transform-origin: 48px 40px; }
+#wp-cursor.cursor--glide svg #wp-wing-L { animation: wp-glide-L 1600ms ease-in-out infinite !important; transform-origin: 48px 40px; }
+#wp-cursor.cursor--glide svg            { animation: wp-body-glide 1600ms ease-in-out infinite !important; }
+
+/* when a short burst is triggered, we use faster, bigger flaps for ~700ms */
+#wp-cursor.cursor--burst svg #wp-wing-R { animation: wp-burst-R 700ms ease-in-out infinite !important; }
+#wp-cursor.cursor--burst svg #wp-wing-L { animation: wp-burst-L 700ms ease-in-out infinite !important; }
+#wp-cursor.cursor--burst svg            { animation: wp-body-burst 700ms ease-in-out infinite !important; }
+
+/* ===== Swoop transition ===== */
+body.leaving .bubble { opacity: .12; transition: opacity .35s ease, transform .35s ease; }
+body.leaving .bubble._clicked { opacity: 1; transform: scale(1.05); }
+
+/* accessibility: if user prefers reduced motion, skip animations */
+@media (prefers-reduced-motion: reduce) {
+  #wp-cursor.cursor--glide svg,
+  #wp-cursor.cursor--glide svg #wp-wing-R,
+  #wp-cursor.cursor--glide svg #wp-wing-L,
+  #wp-cursor.cursor--burst svg,
+  #wp-cursor.cursor--burst svg #wp-wing-R,
+  #wp-cursor.cursor--burst svg #wp-wing-L {
+    animation: none !important;
+  }
+}
