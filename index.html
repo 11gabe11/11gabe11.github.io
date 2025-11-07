@@ -9,66 +9,6 @@
 </head>
 <body>
 
-  <!-- Custom cursor: The Drifting Pigeon (desktop only) -->
-  <div id="wp-cursor" aria-hidden="true">
-    <!-- Homing pigeon SVG (shoulder joint correct; beak hotspot ≈ 112,40) -->
-    <svg viewBox="0 0 120 80" width="96" height="64" role="img" aria-label="Homing pigeon cursor">
-      <defs>
-        <linearGradient id="p-body" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#d0d4d8"/>
-          <stop offset="60%" stop-color="#b3b8be"/>
-          <stop offset="100%" stop-color="#959ba3"/>
-        </linearGradient>
-        <linearGradient id="p-wing" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#c7ccd1"/>
-          <stop offset="50%" stop-color="#aab1b8"/>
-          <stop offset="100%" stop-color="#8a929a"/>
-        </linearGradient>
-        <linearGradient id="p-neck" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%"   stop-color="#27ce80"/>
-          <stop offset="55%"  stop-color="#32a6ee"/>
-          <stop offset="100%" stop-color="#ad6bf0"/>
-        </linearGradient>
-      </defs>
-
-      <!-- tail -->
-      <path d="M14,52 30,47 30,57 Z" fill="url(#p-wing)" stroke="#2c3136" stroke-width="1"/>
-
-      <!-- body -->
-      <ellipse cx="50" cy="50" rx="30" ry="18" fill="url(#p-body)" stroke="#2c3136" stroke-width="1"/>
-
-      <!-- neck iridescence -->
-      <path d="M66,36 C66,48 58,54 50,56 C52,48 56,45 60,40 C62,37 64,36 66,36 Z"
-            fill="url(#p-neck)" opacity=".85"/>
-
-      <!-- head -->
-      <circle cx="84" cy="40" r="10" fill="url(#p-body)" stroke="#2c3136" stroke-width="1"/>
-      <!-- eye -->
-      <circle cx="86.6" cy="38.2" r="1.8" fill="#0b0b0b"/>
-      <circle cx="86.1" cy="37.9" r="0.6" fill="#ffffff" opacity=".9"/>
-
-      <!-- beak (TIP ≈ 112,40) -->
-      <polygon id="wp-beak" points="88,40 112,36 112,44" fill="#e6c35a" stroke="#8b6b1f" stroke-width=".9"/>
-
-      <!-- wings anchored at the shoulder (48,40) -->
-      <g id="wp-wing-R">
-        <path d="M48,40 C42,28 54,24 66,28 C58,28 53,31 52,34 C51,36 50,38 48,40 Z"
-              fill="url(#p-wing)" stroke="#2c3136" stroke-width="1"/>
-        <path d="M50,36 L59,30" stroke="#67707a" stroke-width="1" opacity=".7"/>
-        <path d="M48,39 L57,33" stroke="#67707a" stroke-width="1" opacity=".6"/>
-      </g>
-      <g id="wp-wing-L">
-        <path d="M48,40 C42,52 54,56 66,52 C58,52 53,49 52,46 C51,44 50,42 48,40 Z"
-              fill="url(#p-wing)" stroke="#2c3136" stroke-width="1"/>
-        <path d="M50,44 L59,50" stroke="#67707a" stroke-width="1" opacity=".6"/>
-        <path d="M48,41 L57,47" stroke="#67707a" stroke-width="1" opacity=".5"/>
-      </g>
-
-      <!-- underside shadow -->
-      <ellipse cx="50" cy="60" rx="18" ry="5" fill="#000" opacity=".12"/>
-    </svg>
-  </div>
-
   <!-- Full-screen playground with 4 portal bubbles -->
   <div class="frame">
     <div class="stage" id="stage" aria-label="Portal selection">
@@ -84,9 +24,10 @@
     <a href="mailto:contact@thedriftingpigeon.com">contact@thedriftingpigeon.com</a>
   </footer>
 
-<script type="module" src="pigeon.js"></script>
-<script type="module" src="scripts/auth.js"></script>
-<script type="module" src="scripts/cursor.js"></script>
-<script src="scripts.js"></script> <!-- only on pages that need the bubbles physics -->
+  <!-- scripts -->
+  <script src="scripts.js"></script>
+  <script type="module" src="scripts/pigeon.js"></script>
+  <script type="module" src="scripts/cursor.js"></script>
+  <script type="module" src="scripts/auth.js"></script>
 </body>
 </html>
